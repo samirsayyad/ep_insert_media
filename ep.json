@@ -1,0 +1,34 @@
+{
+    "parts": [
+      {
+        "name":"full_hyperlinks",
+        "pre": ["ep_etherpad-lite/webaccess", "ep_page_view/page_view"],
+        "post": ["ep_etherpad-lite/static"],
+        "client_hooks": {
+          "postAceInit": "ep_insert_media/static/js/index",
+          "collectContentPre": "ep_insert_media/static/js/shared",
+          "aceAttribsToClasses": "ep_insert_media/static/js/index",
+          "aceEditorCSS": "ep_insert_media/static/js/index",
+          "aceEditEvent": "ep_insert_media/static/js/index",
+          "aceInitialized": "ep_insert_media/static/js/index"
+        },
+        "hooks": {
+          "padRemove": "ep_insert_media/index",
+          "padCopy": "ep_insert_media/index",
+          "socketio": "ep_insert_media/index",
+          "expressCreateServer": "ep_insert_media/index",
+          "collectContentPre": "ep_insert_media/static/js/shared",
+          "eejsBlock_editbarMenuLeft": "ep_insert_media/index",
+          "eejsBlock_dd_insert": "ep_insert_media/index",
+          "eejsBlock_scripts": "ep_insert_media/index",
+          "eejsBlock_mySettings": "ep_insert_media/index",
+          "eejsBlock_styles": "ep_insert_media/index",
+          "clientVars": "ep_insert_media/index",
+          "exportHtmlAdditionalTagsWithData": "ep_insert_media/exportHTML",
+          "getLineHTMLForExport": "ep_insert_media/exportHTML",
+          "handleMessageSecurity": "ep_insert_media/index"
+        }
+      }
+    ]
+  }
+  

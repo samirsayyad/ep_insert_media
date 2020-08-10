@@ -1,0 +1,119 @@
+<script src="../static/plugins/ep_insert_media/static/js/jquery.tmpl.min.js"></script>
+
+<!-- Popup displayed so that we can create a link -->
+<script id="newLinkTemplate" type="text/html">
+    <div id="newLink" class="popup toolbar-popup new-link-popup">
+        <div class="popup-content">
+            {{tmpl "#new-link-form"}}
+        </div>
+    </div>
+</script>
+
+<!-- Subtemplate to create a link -->
+<script id="new-link-form" type="text/html">
+    <form class="new-link">
+
+        
+        <input type="text" class="link-content" id="hyperlink-text" placeholder=""/>
+        <input type="text" class="link-content"  id="hyperlink-url"  placeholder="http://..."/>
+        
+
+        <div class="form-more">
+            <div class="link-buttons">
+                <input type="submit" id="link-create-btn" class="btn btn-primary" value="Link" data-l10n-id="ep_insert_media.links_template.{{if link}}link{{else}}link{{/if}}.value" />
+                <input type="reset" id="link-reset" class="btn btn-default btn-cancel-reply" value="Cancel" data-l10n-id="ep_insert_media.links_template.cancel.value" />
+            </div>
+        </div>
+    </form>
+</script>
+
+<!-- Display the link on the right side of the page -->
+<script id="linksTemplate" type="text/html">
+    <div id="${linkId}" data-linkid="${linkId}" data-hyperlink="${hyperlink}"
+         class="sidebar-link link-container {{if changeAccepted}}change-accepted{{/if}}" >
+
+
+       
+
+        <div class="full-display-content">
+            <div class="link-title-wrapper">
+                <div id="card_loading_hyperlink" class="card"> 
+                    <div class="card__image loading"></div> 
+                    <div class="card__title loading"></div> 
+                    <div class="card__title loading"></div> 
+                    <div class="card__title loading"></div> 
+                </div> 
+                
+                <img id="ep_hyperlink_img"/>
+                <a target="_blank" id="ep_hyperlink_title"></a>
+            </div>
+            <span class="link-actions-wrapper">
+
+                <span class="link-edit buttonicon buttonicon-edit" data-l10n-id="ep_insert_media.edit_link.title"></span>
+                <img src="../static/plugins/ep_insert_media/static/img/breakLine.png" class="link-delete buttonicon" />
+                <span  class="link-close" data-l10n-id="ep_insert_media.edit_link.close">&times;</span>
+
+            </span>
+
+            <div class="link-title-wrapper">
+                <div class="link-edit-form">
+
+                    <div class="hyperlink-form-lable-section">
+                        <span class="hyperlink-form-lable" >Link</span>
+                        <input type="url" value="${hyperlink}" class="link-text-hyperlink"><br><br>
+
+                    </div>
+                    <div class="hyperlink-form-lable-section">
+                        <span  class="hyperlink-form-lable">Text</span>
+                        <input type="text" value="${text}" class="link-text-text"> 
+
+                    </div>
+
+                    <button class="btn btn-primary acl-write submit_LCM link-edit-submit" data-l10n-id="ep_insert_media.links_template.accept_change.save">APPLY</button>
+
+                </div>
+            </div>
+   
+ 
+        </div>
+    </div>
+</script>
+
+<!-- SubTemplate to display the link text -->
+<script id="link-text" type="text/html">
+    {{if text.length > 0}}
+        <span class="link-text">${text}</span>
+    {{else}}
+        <span class="link-text default-text" data-l10n-id="ep_insert_media.links_template.suggested_change">Suggested Change</span>
+    {{/if}}
+</script>
+
+<!-- SubTemplate to dislay a suggestion -->
+<script id="display-suggestion" type="text/html">
+    <!-- When link contains a suggestion, we display it with an approval button -->
+    {{if changeTo}}
+    <form class="link-changeTo-form suggestion-display">
+        <span class="from-label" data-l10n-id="ep_insert_media.links_template.suggested_change_from">Suggested Change From</span>
+        <span class="from-value">${changeFrom}</span>
+        <span class="to-label" data-l10n-id="ep_insert_media.links_template.to">To</span>
+        <span class="to-value">${changeTo}</span>
+        <!-- Approve/revert button -->
+        <input type="Submit" class="btn btn-primary approve-suggestion-btn acl-write" value="Accept Change" data-l10n-id="ep_insert_media.links_template.accept_change.value">
+        <input type="Submit" class="btn btn-default revert-suggestion-btn acl-write" value="Revert Change" data-l10n-id="ep_insert_media.links_template.revert_change.value">
+
+    </form>
+    {{/if}}
+</script>
+
+
+
+<!-- When click Edit on a link, we insert this template just next to the link so we can edit it -->
+<!-- <script id="editLinkTemplate" type="text/html">
+  <div class="link-edit-form">
+    <textarea class="link-edit-text">${hyperlink}</textarea>
+    <p>
+      <button class="btn btn-primary link-edit-submit" data-l10n-id="ep_insert_media.links_template.edit_link.save">Save</button>
+      <button class="btn btn-default link-edit-cancel" data-l10n-id="ep_insert_media.links_template.edit_link.cancel">Cancel</button>
+    </p>
+  </div>
+</script> -->
