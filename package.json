@@ -1,30 +1,17 @@
 {
-  "name": "ep_insert_media",
-  "version": "1.0.0",
-  "description": "etherpad plugin ep_full_hyperlink hyperlink",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "name": "ep_embedmedia",
+  "description": "Embed media (youtube, vimeo etc)",
+  "version": "0.0.7",
+  "author": "RedHog (Egil Moeller) <egil.moller@freecode.no>",
+  "contributors": [
+    "johnyma22 (John McLear) <john@mclear.co.uk>"
+  ],
+  "dependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/samirsayyad/ep_insert_media.git"
+    "url": "https://github.com/JohnMcLear/ep_embedmedia.git"
   },
-  "keywords": [
-    "etherpad",
-    "plugin",
-    "ep_full_hyperlink",
-    "hyperlink"
-  ],
-  "author": "Samir Sayyad",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/samirsayyad/ep_insert_media/issues"
-  },
-  "dependencies": {
-    "formidable": "*",
-    "meta-resolver": "0.0.3",
-    "socket.io-client": "*"
-  },
-  "homepage": "https://github.com/samirsayyad/ep_insert_media#readme"
+  "engines": {
+    "node": "*"
+  }
 }

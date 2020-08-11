@@ -1,16 +1,29 @@
-.linkicon {
-    background-repeat: no-repeat;
-    display: inline-block;
-    height: 16px;
-    vertical-align: middle;
-    width: 16px;
-  }
-  .linkicon:before{
-    font-family: "fontawesome-etherpad";
-    content: "\e828";
-    color:#666;
-    font-size:14px;
-    padding-top:2px;
-    line-height:17px;
-  }
-  
+#embedMediaModal {
+  position: absolute;
+  top: 55px;
+  right: 20px;
+  display: block;
+  z-index:999999;
+}
+
+.embedMediaButton {
+  padding:10px;
+}
+
+#cancelEmbedMedia{
+  color:red;
+} 
+
+#insertEmbedMedia {
+  font-family:font-awesome;
+}
+
+.buttonicon-embed-media:before{
+  content:"\e80b";
+  top: 2px !important;
+}
+.insertEmbedMedia-show {
+  transform: scale(1) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
