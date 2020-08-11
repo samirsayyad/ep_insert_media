@@ -1,17 +1,17 @@
 {
   "parts": [
     {
-      "name": "embedmedia",
+      "name": "insert_media",
       "hooks": {
-	"eejsBlock_editbarMenuLeft": "ep_embedmedia/hooks:eejsBlock_editbarMenuLeft",
-	"eejsBlock_scripts": "ep_embedmedia/hooks:eejsBlock_scripts",
-	"eejsBlock_styles": "ep_embedmedia/hooks:eejsBlock_styles",
-	"eejsBlock_body": "ep_embedmedia/hooks:eejsBlock_body"
+	"eejsBlock_editbarMenuLeft": "ep_insert_media/hooks:eejsBlock_editbarMenuLeft",
+	"eejsBlock_scripts": "ep_insert_media/hooks:eejsBlock_scripts",
+	"eejsBlock_styles": "ep_insert_media/hooks:eejsBlock_styles",
+	"eejsBlock_body": "ep_insert_media/hooks:eejsBlock_body"
       },
       "client_hooks": {
-        "aceInitInnerdocbodyHead": "ep_embedmedia/static/js/hooks:aceInitInnerdocbodyHead",
-        "aceAttribsToClasses": "ep_embedmedia/static/js/hooks:aceAttribsToClasses",
-        "aceCreateDomLine": "ep_embedmedia/static/js/hooks:aceCreateDomLine"
+        "aceInitInnerdocbodyHead": "ep_insert_media/static/js/hooks:aceInitInnerdocbodyHead",
+        "aceAttribsToClasses": "ep_insert_media/static/js/hooks:aceAttribsToClasses",
+        "aceCreateDomLine": "ep_insert_media/static/js/hooks:aceCreateDomLine"
       }
     }
   ]
