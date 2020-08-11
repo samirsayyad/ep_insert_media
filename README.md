@@ -1,4 +1,4 @@
-[![Travis (.org)](https://api.travis-ci.org/JohnMcLear/ep_embedmedia.git.svg?branch=develop)](https://travis-ci.org/github/JohnMcLear/ep_embedmedia.git)
+[![Travis (.org)](https://api.travis-ci.org/JohnMcLear/ep_insert_media.git.svg?branch=develop)](https://travis-ci.org/github/JohnMcLear/ep_insert_media.git)
 
 # My awesome plugin README example
 Explain what your plugin does and who it's useful for.
@@ -6,7 +6,7 @@ Explain what your plugin does and who it's useful for.
 ## Example animated gif of usage if appropriate
 
 ## Installing
-npm install ep_embedmedia
+npm install ep_insert_media
 
 or Use the Etherpad ``/admin`` interface.
 

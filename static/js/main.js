@@ -4,10 +4,11 @@ $(document).ready(function () {
     // padeditbar.toogleDropDown("embedMediaModal");
     var module = $("#embedMediaModal");
     console.log(module)
-    if (!module.hasClass('insertEmbedMedia')) {
+    if (!module.hasClass('insertEmbedMedia-show')) {
       module.addClass("insertEmbedMedia-show");
     } else {
-      module.removeClass("insertEmbedMedia-show");
+
+      console.log("ssssssss",module.removeClass("insertEmbedMedia-show"))
     }
   });
 
