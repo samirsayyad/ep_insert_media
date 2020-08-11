@@ -64,11 +64,11 @@ exports.socketio = function (hook_name, args, cb){
     });
 
     // On add events
-    socket.on('addLink', function (data, callback) {
+    socket.on('addMedia', function (data, callback) {
       var padId = data.padId;
       var content = data.link;
-      linkManager.addLink(padId, content, function (err, linkId, link){
-        socket.broadcast.to(padId).emit('pushAddLink', linkId, link);
+      linkManager.addMedia(padId, content, function (err, linkId, link){
+        socket.broadcast.to(padId).emit('pushaddMedia', linkId, link);
         callback(linkId, link);
       });
     });
@@ -100,17 +100,17 @@ exports.socketio = function (hook_name, args, cb){
       });
     });
 
-    socket.on('bulkAddLink', function (padId, data, callback) {
-      linkManager.bulkAddLinks(padId, data, function(error, linksId, links){
-        socket.broadcast.to(padId).emit('pushAddLinkInBulk');
+    socket.on('bulkaddMedia', function (padId, data, callback) {
+      linkManager.bulkaddMedias(padId, data, function(error, linksId, links){
+        socket.broadcast.to(padId).emit('pushaddMediaInBulk');
         var linkWithLinkId = _.object(linksId, links); // {c-123:data, c-124:data}
         callback(linkWithLinkId)
       });
     });
 
-    socket.on('bulkAddLinkReplies', function(padId, data, callback){
-      linkManager.bulkAddLinkReplies(padId, data, function (err, repliesId, replies){
-        socket.broadcast.to(padId).emit('pushAddLinkReply', repliesId, replies);
+    socket.on('bulkaddMediaReplies', function(padId, data, callback){
+      linkManager.bulkaddMediaReplies(padId, data, function (err, repliesId, replies){
+        socket.broadcast.to(padId).emit('pushaddMediaReply', repliesId, replies);
         var repliesWithReplyId = _.zip(repliesId, replies);
         callback(repliesWithReplyId);
       });
@@ -150,7 +150,7 @@ exports.socketio = function (hook_name, args, cb){
       callback(result)
     })
 
-    socket.on('addLinkReply', function (data, callback) {
+    socket.on('addMediaReply', function (data, callback) {
       var padId = data.padId;
       var content = data.reply;
       var changeTo = data.changeTo || null;
@@ -158,26 +158,26 @@ exports.socketio = function (hook_name, args, cb){
       var changeAccepted = data.changeAccepted || null;
       var changeReverted = data.changeReverted || null;
       var linkId = data.linkId;
-      linkManager.addLinkReply(padId, data, function (err, replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted){
+      linkManager.addMediaReply(padId, data, function (err, replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted){
         reply.replyId = replyId;
-        socket.broadcast.to(padId).emit('pushAddLinkReply', replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted);
+        socket.broadcast.to(padId).emit('pushaddMediaReply', replyId, reply, changeTo, changeFrom, changeAccepted, changeReverted);
         callback(replyId, reply);
       });
     });
 
     // link added via API
-    socket.on('apiAddLinks', function (data) {
+    socket.on('apiaddMedias', function (data) {
       var padId = data.padId;
       var linkIds = data.linkIds;
       var links = data.links;
 
       for (var i = 0, len = linkIds.length; i < len; i++) {
-        socket.broadcast.to(padId).emit('pushAddLink', linkIds[i], links[i]);
+        socket.broadcast.to(padId).emit('pushaddMedia', linkIds[i], links[i]);
       }
     });
 
     // link reply added via API
-    socket.on('apiAddLinkReplies', function (data) {
+    socket.on('apiaddMediaReplies', function (data) {
       var padId = data.padId;
       var replyIds = data.replyIds;
       var replies = data.replies;
@@ -186,7 +186,7 @@ exports.socketio = function (hook_name, args, cb){
         var reply = replies[i];
         var replyId = replyIds[i];
         reply.replyId = replyId;
-        socket.broadcast.to(padId).emit('pushAddLinkReply', replyId, reply);
+        socket.broadcast.to(padId).emit('pushaddMediaReply', replyId, reply);
       }
     });
 
@@ -334,7 +334,7 @@ var broadcastLinksAdded = function(padId, linkIds, links) {
     links: links
   };
 
-  socket.emit('apiAddLinks', data);
+  socket.emit('apiaddMedias', data);
 }
 
 var broadcastLinkRepliesAdded = function(padId, replyIds, replies) {
@@ -346,7 +346,7 @@ var broadcastLinkRepliesAdded = function(padId, replyIds, replies) {
     replies: replies
   };
 
-  socket.emit('apiAddLinkReplies', data);
+  socket.emit('apiaddMediaReplies', data);
 }
 
 var broadcastUrl = apiUtils.broadcastUrlFor("/link");

@@ -82,7 +82,7 @@ var insertNewLinkPopupIfDontExist = function(link, callback) {
 
 var showNewLinkPopup = function() {
   // position below link icon
-  $('#newLink').css('left', $('.toolbar .addLink').offset().left)
+  $('#newLink').css('left', $('.toolbar .addMedia').offset().left)
 
   // Reset form to make sure it is all clear
   $('#newLink').find('.suggestion-checkbox').prop('checked', false).trigger('change');

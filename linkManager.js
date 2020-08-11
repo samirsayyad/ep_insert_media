@@ -53,9 +53,9 @@ exports.deleteLinks = function (padId, callback)
   });
 };
 
-exports.addLink = function(padId, data, callback)
+exports.addMedia = function(padId, data, callback)
 {
-  exports.bulkAddLinks(padId, [data], function(err, linkIds, links) {
+  exports.bulkaddMedias(padId, [data], function(err, linkIds, links) {
     if(ERR(err, callback)) return;
 
     if(linkIds && linkIds.length > 0 && links && links.length > 0) {
@@ -64,7 +64,7 @@ exports.addLink = function(padId, data, callback)
   });
 };
 
-exports.bulkAddLinks = function(padId, data, callback)
+exports.bulkaddMedias = function(padId, data, callback)
 {
  // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
@@ -154,8 +154,8 @@ exports.deleteLinkReplies = function (padId, callback){
   });
 };
 
-exports.addLinkReply = function(padId, data, callback){
-  exports.bulkAddLinkReplies(padId, [data], function(err, replyIds, replies) {
+exports.addMediaReply = function(padId, data, callback){
+  exports.bulkaddMediaReplies(padId, [data], function(err, replyIds, replies) {
     if(ERR(err, callback)) return;
 
     if(replyIds && replyIds.length > 0 && replies && replies.length > 0) {
@@ -164,7 +164,7 @@ exports.addLinkReply = function(padId, data, callback){
   });
 };
 
-exports.bulkAddLinkReplies = function(padId, data, callback){
+exports.bulkaddMediaReplies = function(padId, data, callback){
   // We need to change readOnly PadIds to Normal PadIds
   var isReadOnly = padId.indexOf("r.") === 0;
   if(isReadOnly){

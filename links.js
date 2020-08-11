@@ -25,7 +25,7 @@ exports.getPadLinkReplies = function(padID, callback)
 
 exports.bulkAddPadLinks = function(padID, data, callback)
 {
-  linkManager.bulkAddLinks(padID, data, function (err, linkIDs, links)
+  linkManager.bulkaddMedias(padID, data, function (err, linkIDs, links)
   {
     if(ERR(err, callback)) return;
 
@@ -35,7 +35,7 @@ exports.bulkAddPadLinks = function(padID, data, callback)
 
 exports.bulkAddPadLinkReplies = function(padID, data, callback)
 {
-  linkManager.bulkAddLinkReplies(padID, data, function (err, replyIDs, replies)
+  linkManager.bulkaddMediaReplies(padID, data, function (err, replyIDs, replies)
   {
     if(ERR(err, callback)) return;
 

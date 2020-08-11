@@ -106,7 +106,7 @@ ep_links.prototype.init = function(){
   $(window).resize(_.debounce( function() { self.setYofLinks() }, 100 ) );
 
   // On click link icon toolbar
-  $('.addLink').on('click', function(e){
+  $('.addMedia').on('click', function(e){
     e.preventDefault(); // stops focus from being lost
     self.displayNewLinkForm();
   });
@@ -284,7 +284,7 @@ ep_links.prototype.init = function(){
   //   data.reply = $(this).find(".link-content").val();
   //   data.changeTo = $(this).find(".to-value").val() || null;
   //   data.changeFrom = $(this).find(".from-value").text() || null;
-  //   self.socket.emit('addLinkReply', data, function (){
+  //   self.socket.emit('addMediaReply', data, function (){
   //     self.getLinkReplies(function(replies){
   //       self.linkReplies = replies;
   //       self.collectLinkReplies();
@@ -1034,11 +1034,11 @@ ep_links.prototype.cleanLine = function(line, lineText){
 // Save link
 ep_links.prototype.saveLink = function(data, rep) {
   var self = this;
-  self.socket.emit('addLink', data, function (linkId, link){
+  self.socket.emit('addMedia', data, function (linkId, link){
     link.linkId = linkId;
 
     self.ace.callWithAce(function (ace){
-      // console.log('addLink :: ', rep, link);
+      // console.log('addMedia :: ', rep, link);
       ace.ace_performSelectionChange(rep.selStart, rep.selEnd, true);
       ace.ace_setAttributeOnSelection('link', linkId);
     },'insertLink', true);
@@ -1053,7 +1053,7 @@ ep_links.prototype.saveLink = function(data, rep) {
 ep_links.prototype.saveLinkWithoutSelection = function (padId, linkData) {
   var self = this;
   var data = self.buildLinks(linkData);
-  self.socket.emit('bulkAddLink', padId, data, function (links){
+  self.socket.emit('bulkaddMedia', padId, data, function (links){
     self.setLinks(links);
     self.shouldCollectLink = true
   });
@@ -1089,7 +1089,7 @@ ep_links.prototype.getMapfakeLinks = function(){
 ep_links.prototype.saveLinkReplies = function(padId, linkReplyData){
   var self = this;
   var data = self.buildLinkReplies(linkReplyData);
-  self.socket.emit('bulkAddLinkReplies', padId, data, function (replies){
+  self.socket.emit('bulkaddMediaReplies', padId, data, function (replies){
     _.each(replies,function(reply){
       self.setLinkReply(reply);
     });
@@ -1124,7 +1124,7 @@ ep_links.prototype.buildLinkReply = function(replyData){
 ep_links.prototype.linkListen = function(){
   var self = this;
   var socket = this.socket;
-  socket.on('pushAddLinkInBulk', function (){
+  socket.on('pushaddMediaInBulk', function (){
     self.getLinks(function (allLinks){
       if (!$.isEmptyObject(allLinks)){
         // we get the links in this format {c-123:{author:...}, c-124:{author:...}}
@@ -1146,7 +1146,7 @@ ep_links.prototype.linkListen = function(){
 ep_links.prototype.linkRepliesListen = function(){
   var self = this;
   var socket = this.socket;
-  socket.on('pushAddLinkReply', function (replyId, reply, changeTo, changeFrom){
+  socket.on('pushaddMediaReply', function (replyId, reply, changeTo, changeFrom){
     // console.warn("pAcR response", replyId, reply, changeTo, changeFrom);
     // callback(replyId, reply);
     // self.collectLinkReplies();
@@ -1225,14 +1225,14 @@ ep_links.prototype.pushLink = function(eventType, callback){
 
   // On collaborator add a link in the current pad
   if (eventType == 'add'){
-    socket.on('pushAddLink', function (linkId, link){
+    socket.on('pushaddMedia', function (linkId, link){
       callback(linkId, link);
     });
   }
 
   // On reply
-  else if (eventType == "addLinkReply"){
-    socket.on('pushAddLinkReply', function (replyId, reply){
+  else if (eventType == "addMediaReply"){
+    socket.on('pushaddMediaReply', function (replyId, reply){
       callback(replyId, reply);
     });
   }
