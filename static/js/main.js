@@ -7,8 +7,7 @@ $(document).ready(function () {
     if (!module.hasClass('insertEmbedMedia-show')) {
       module.addClass("insertEmbedMedia-show");
     } else {
-
-      console.log("ssssssss",module.removeClass("insertEmbedMedia-show"))
+      module.removeClass("insertEmbedMedia-show");
     }
   });
 
