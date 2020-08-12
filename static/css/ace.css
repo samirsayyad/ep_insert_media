@@ -17,4 +17,40 @@
   font-size: 0;
   opacity: 0;
 }
+.embedRemoteImageSpan{
+  display: inline-block;
+  line-height: 0;
+  width:50%;
+  cursor: pointer;
+}
+
+.embedRemoteImage{
+  width: 100%;
+  object-fit: cover;
+
+}
+.embedRemoteImageSpanBig{
+  display: inline-block;
+  line-height: 0;
+  width:100%;
+  cursor: pointer;
+
+}
+.image{
+  object-fit: cover;
+
+}
+
+.embedRemoteImageSpan .character {
+    /* Do not use display: none, or you'll break backspace for some reason! */
+    font-size: 0;
+    opacity: 0;
+}
+
+.embedRemoteImageSpanBig .character {
+  /* Do not use display: none, or you'll break backspace for some reason! */
+  font-size: 0;
+  opacity: 0;
+}
+
 

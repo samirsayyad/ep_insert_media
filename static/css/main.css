@@ -52,3 +52,7 @@ border: 1px solid #e6e8e9;
 #embedMediaSrc{
   width:100%
 }
+.embeddedRemoteImage{
+
+  object-fit: cover;
+}

@@ -1,3 +1,5 @@
+var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
+
 exports.aceInitInnerdocbodyHead = function(hook_name, args, cb) {
   args.iframeHTML.push('<link rel="stylesheet" type="text/css" href="/static/plugins/ep_insert_media/static/css/ace.css"/>');
   return cb();
@@ -8,6 +10,8 @@ exports.aceAttribsToClasses = function(hook_name, args, cb) {
     return cb(["embedMedia:" + args.value]);
   if (args.key == 'insertEmbedPicture' && args.value != "")
   return cb(["insertEmbedPicture:" + args.value]);
+  if (args.key == 'insertEmbedPictureBig' && args.value != "")
+  return cb(["insertEmbedPictureBig:" + args.value]);
 };
 
 exports.aceCreateDomLine = function(hook_name, args, cb) {
@@ -19,15 +23,16 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
     for (var i = 0; i < argClss.length; i++) {
       var cls = argClss[i];
       if (cls.indexOf("embedMedia:") != -1) {
-	value = cls.substr(cls.indexOf(":")+1);
+	      value = cls.substr(cls.indexOf(":")+1);
       } else {
-	clss.push(cls);
+	      clss.push(cls);
       }
     }
 
       return cb([{cls: clss.join(" "), extraOpenTags: "<span class='embedMedia'><span class='media'>" + exports.cleanEmbedCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
   }
   if (args.cls.indexOf('insertEmbedPicture:') >= 0) {
+    console.log("I came here too insertEmbedPicture",args)
     var clss = [];
     var argClss = args.cls.split(" ");
      var value;
@@ -35,13 +40,30 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
     for (var i = 0; i < argClss.length; i++) {
       var cls = argClss[i];
       if (cls.indexOf("insertEmbedPicture:") != -1) {
-	value = cls.substr(cls.indexOf(":")+1);
+	      value = cls.substr(cls.indexOf(":")+1);
       } else {
-	clss.push(cls);
+	      clss.push(cls);
       }
     }
 
-      return cb([{cls: clss.join(" "), extraOpenTags: "<span class='embedMedia'><span class='media'>" + exports.cleanEmbedPictureCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(value)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan'><span class='image'>" + exports.cleanEmbedPictureCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+  }
+  if (args.cls.indexOf('insertEmbedPictureBig:') >= 0) {
+    console.log("I came here too insertEmbedPictureBig",args)
+    var clss = [];
+    var argClss = args.cls.split(" ");
+     var value;
+
+    for (var i = 0; i < argClss.length; i++) {
+      var cls = argClss[i];
+      if (cls.indexOf("insertEmbedPictureBig:") != -1) {
+	      value = cls.substr(cls.indexOf(":")+1);
+      } else {
+	      clss.push(cls);
+      }
+    }
+
+      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(value)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpanBig'><span class='image'>" + exports.cleanEmbedPictureCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
   }
 
   return cb();
@@ -89,7 +111,7 @@ exports.sanitize = function (inputHtml) {
 
 exports.cleanEmbedPictureCode = function(orig) {
   value = $.trim(orig);
-  return "<img  width=\"420\" height=\"315\"  src='"+value+"'>";
+  return "<img class='embedRemoteImage' src='"+value+"'>";
 }
 
 
@@ -125,4 +147,58 @@ exports.cleanEmbedCode = function (orig) {
   }
 
   return res;
+}
+
+
+exports.aceInitialized = function(hook, context){
+  var padOuter = $('iframe[name="ace_outer"]').contents();
+  var padInner = padOuter.find('iframe[name="ace_inner"]');
+  var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
+
+  padInner.contents().on("click", ".embedRemoteImageSpanBig", function(e){
+    var url = $(this).data("url")
+    var id = $(this).attr("id")
+    var selector = "#"+id
+    //$(this).remove()
+    var ace = padeditor.ace;
+
+    padeditor.ace.callWithAce(function (aceTop) {
+      var repArr = aceTop.ace_getRepFromSelector(selector, padInner);
+      $.each(repArr, function(index, rep){
+        // I don't think we need this nested call
+        ace.callWithAce(function (ace){
+          ace.ace_performSelectionChange(rep[0],rep[1],true);
+          ace.ace_setAttributeOnSelection('embedRemoteImageSpanBig', 'embedRemoteImageSpan');
+          // Note that this is the correct way of doing it, instead of there being
+          // a linkId we now flag it as "link-deleted"
+        });
+      });
+    }, "changeEmbedPicture");
+  })
+
+
+
+
+  padInner.contents().on("click", ".embedRemoteImageSpan", function(e){
+    var url = $(this).data("url")
+    var id = $(this).attr("id")
+    var selector = ".embedRemoteImageSpan"
+    //$(this).remove()
+    var ace = padeditor.ace;
+
+    padeditor.ace.callWithAce(function (aceTop) {
+      var repArr = aceTop.ace_getRepFromSelector(selector, padInner);
+      $.each(repArr, function(index, rep){
+        console.log(repArr)
+        // I don't think we need this nested call
+        ace.callWithAce(function (ace){
+          ace.ace_performSelectionChange(rep[0],rep[1],true);
+          ace.ace_setAttributeOnSelection('embedRemoteImageSpan', 'embedRemoteImageSpanBig');
+          // Note that this is the correct way of doing it, instead of there being
+          // a linkId we now flag it as "link-deleted"
+        });
+      });
+    }, "changeEmbedPicture");
+
+  })
 }
