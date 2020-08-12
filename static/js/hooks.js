@@ -6,12 +6,13 @@ exports.aceInitInnerdocbodyHead = function(hook_name, args, cb) {
 };
 
 exports.aceAttribsToClasses = function(hook_name, args, cb) {
+  console.log("aceAttribsToClasses",args)
   if (args.key == 'embedMedia' && args.value != "")
     return cb(["embedMedia:" + args.value]);
   if (args.key == 'insertEmbedPicture' && args.value != "")
   return cb(["insertEmbedPicture:" + args.value]);
-  if (args.key == 'insertEmbedPictureBig' && args.value != "")
-  return cb(["insertEmbedPictureBig:" + args.value]);
+  // if (args.key == 'insertEmbedPicture' && args.value == "embedRemoteImageSpanBig")
+  // return cb(["insertEmbedPictureBig:" + args.value]);
 };
 
 exports.aceCreateDomLine = function(hook_name, args, cb) {
@@ -41,29 +42,22 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
       var cls = argClss[i];
       if (cls.indexOf("insertEmbedPicture:") != -1) {
 	      value = cls.substr(cls.indexOf(":")+1);
-      } else {
+      }
+       else {
 	      clss.push(cls);
       }
     }
 
-      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(value)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan'><span class='image'>" + exports.cleanEmbedPictureCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
-  }
-  if (args.cls.indexOf('insertEmbedPictureBig:') >= 0) {
-    console.log("I came here too insertEmbedPictureBig",args)
-    var clss = [];
-    var argClss = args.cls.split(" ");
-     var value;
-
-    for (var i = 0; i < argClss.length; i++) {
-      var cls = argClss[i];
-      if (cls.indexOf("insertEmbedPictureBig:") != -1) {
-	      value = cls.substr(cls.indexOf(":")+1);
-      } else {
-	      clss.push(cls);
-      }
-    }
-
+    if (value.indexOf("embedRemoteImageSpanBig:") != -1){
+      
+      value = value.substr(value.indexOf(":")+1);
       return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(value)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpanBig'><span class='image'>" + exports.cleanEmbedPictureCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+
+      
+    }else{
+      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(value)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan'><span class='image'>" + exports.cleanEmbedPictureCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+
+    }
   }
 
   return cb();
@@ -165,10 +159,11 @@ exports.aceInitialized = function(hook, context){
     padeditor.ace.callWithAce(function (aceTop) {
       var repArr = aceTop.ace_getRepFromSelector(selector, padInner);
       $.each(repArr, function(index, rep){
+        console.log(repArr)
         // I don't think we need this nested call
         ace.callWithAce(function (ace){
           ace.ace_performSelectionChange(rep[0],rep[1],true);
-          ace.ace_setAttributeOnSelection('embedRemoteImageSpanBig', 'embedRemoteImageSpan');
+          ace.ace_setAttributeOnSelection('insertEmbedPicture', url);
           // Note that this is the correct way of doing it, instead of there being
           // a linkId we now flag it as "link-deleted"
         });
@@ -182,7 +177,7 @@ exports.aceInitialized = function(hook, context){
   padInner.contents().on("click", ".embedRemoteImageSpan", function(e){
     var url = $(this).data("url")
     var id = $(this).attr("id")
-    var selector = ".embedRemoteImageSpan"
+    var selector = "#"+id
     //$(this).remove()
     var ace = padeditor.ace;
 
@@ -193,7 +188,7 @@ exports.aceInitialized = function(hook, context){
         // I don't think we need this nested call
         ace.callWithAce(function (ace){
           ace.ace_performSelectionChange(rep[0],rep[1],true);
-          ace.ace_setAttributeOnSelection('embedRemoteImageSpan', 'embedRemoteImageSpanBig');
+          ace.ace_setAttributeOnSelection('insertEmbedPicture', 'embedRemoteImageSpanBig:'+url);
           // Note that this is the correct way of doing it, instead of there being
           // a linkId we now flag it as "link-deleted"
         });

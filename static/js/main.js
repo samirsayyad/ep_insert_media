@@ -28,7 +28,7 @@ $(document).ready(function () {
       return padeditor.ace.callWithAce(function (ace) {
         var rep = ace.ace_getRep();
         ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
-        ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, true);
+        ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
         ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", escape($("#embedPictureSrc")[0].value)]]);
       }, "insertEmbedPicture");
     }
@@ -40,12 +40,5 @@ $(document).ready(function () {
     //$("#embedMediaModal").slideUp("fast");
     $("#embedMediaModal").removeClass("insertEmbedMedia-show");
   });
-
-  // $('.embedRemoteImageSpan').on('click', 'img', function() {
-  //   // var num = parseInt($(this).attr('id').match(/\d+$/),10);
-  //   //     alert(num); // returns number
-    
-  //   console.log($(this))
-  //    });
 
 });
