@@ -16,14 +16,23 @@ $(document).ready(function () {
 
     //$("#embedMediaModal").slideUp("fast");
     $("#embedMediaModal").removeClass("insertEmbedMedia-show");
+    if($("#embedMediaSrc")[0].value !=""){
+      return padeditor.ace.callWithAce(function (ace) {
+        var rep = ace.ace_getRep();
+        ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
+        ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
+        ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["embedMedia", escape($("#embedMediaSrc")[0].value)]]);
+      }, "embedMedia");
+    }else{
+      return padeditor.ace.callWithAce(function (ace) {
+        var rep = ace.ace_getRep();
+        ace.ace_replaceRange(rep.selStart, rep.selEnd, "PE");
+        ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
+        ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", escape($("#embedPictureSrc")[0].value)]]);
+      }, "insertEmbedPicture");
+    }
 
-
-    return padeditor.ace.callWithAce(function (ace) {
-      var rep = ace.ace_getRep();
-      ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
-      ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-      ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["embedMedia", escape($("#embedMediaSrc")[0].value)]]);
-    }, "embedMedia");
+    
   });
 
   $("#cancelEmbedMedia").click(function () {

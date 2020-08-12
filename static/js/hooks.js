@@ -6,6 +6,8 @@ exports.aceInitInnerdocbodyHead = function(hook_name, args, cb) {
 exports.aceAttribsToClasses = function(hook_name, args, cb) {
   if (args.key == 'embedMedia' && args.value != "")
     return cb(["embedMedia:" + args.value]);
+  if (args.key == 'insertEmbedPicture' && args.value != "")
+  return cb(["insertEmbedPicture:" + args.value]);
 };
 
 exports.aceCreateDomLine = function(hook_name, args, cb) {
@@ -24,6 +26,22 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
     }
 
       return cb([{cls: clss.join(" "), extraOpenTags: "<span class='embedMedia'><span class='media'>" + exports.cleanEmbedCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+  }
+  if (args.cls.indexOf('insertEmbedPicture:') >= 0) {
+    var clss = [];
+    var argClss = args.cls.split(" ");
+     var value;
+
+    for (var i = 0; i < argClss.length; i++) {
+      var cls = argClss[i];
+      if (cls.indexOf("insertEmbedPicture:") != -1) {
+	value = cls.substr(cls.indexOf(":")+1);
+      } else {
+	clss.push(cls);
+      }
+    }
+
+      return cb([{cls: clss.join(" "), extraOpenTags: "<span class='embedMedia'><span class='media'>" + exports.cleanEmbedPictureCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
   }
 
   return cb();
@@ -68,6 +86,12 @@ exports.sanitize = function (inputHtml) {
     return attribs;
   });
 }
+
+exports.cleanEmbedPictureCode = function(orig) {
+  value = $.trim(orig);
+  return "<img  width=\"420\" height=\"315\"  src='"+value+"'>";
+}
+
 
 exports.cleanEmbedCode = function (orig) {
   var res = null;
