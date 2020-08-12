@@ -77,7 +77,7 @@ exports.cleanEmbedCode = function (orig) {
   if (value.indexOf('http://') == 0 || value.indexOf('https://') == 0) {
     if (value.indexOf("www.youtube.com") != -1) {
       var video = escape(parseUrlParams(value).v);
-      res = '<iframe width="420" height="315" src="https://www.youtube.com/embed/' + video + '" frameborder="0" allowfullscreen></iframe>';
+      res = '<iframe  type="text/html"  width="420" height="315" src="https://www.youtube.com/embed/' + video + '?enablejsapi=1&origin=https://docs.plus" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
     } else if (value.indexOf("vimeo.com") != -1) {
       var video = escape(value.split("/").pop());
       res = '<iframe src="http://player.vimeo.com/video/' + video + '?color=ffffff" width="420" height="236" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
