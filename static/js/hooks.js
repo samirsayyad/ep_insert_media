@@ -33,7 +33,6 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
       return cb([{cls: clss.join(" "), extraOpenTags: "<span class='embedMedia'><span class='media'>" + exports.cleanEmbedCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
   }
   if (args.cls.indexOf('insertEmbedPicture:') >= 0) {
-    console.log("I came here too insertEmbedPicture",args)
     var clss = [];
     var argClss = args.cls.split(" ");
      var value;
@@ -153,19 +152,14 @@ exports.aceInitialized = function(hook, context){
     var url = $(this).data("url")
     var id = $(this).attr("id")
     var selector = "#"+id
-    //$(this).remove()
     var ace = padeditor.ace;
 
     padeditor.ace.callWithAce(function (aceTop) {
       var repArr = aceTop.ace_getRepFromSelector(selector, padInner);
       $.each(repArr, function(index, rep){
-        console.log(repArr)
-        // I don't think we need this nested call
         ace.callWithAce(function (ace){
           ace.ace_performSelectionChange(rep[0],rep[1],true);
           ace.ace_setAttributeOnSelection('insertEmbedPicture', url);
-          // Note that this is the correct way of doing it, instead of there being
-          // a linkId we now flag it as "link-deleted"
         });
       });
     }, "changeEmbedPicture");
@@ -178,19 +172,15 @@ exports.aceInitialized = function(hook, context){
     var url = $(this).data("url")
     var id = $(this).attr("id")
     var selector = "#"+id
-    //$(this).remove()
     var ace = padeditor.ace;
 
     padeditor.ace.callWithAce(function (aceTop) {
       var repArr = aceTop.ace_getRepFromSelector(selector, padInner);
       $.each(repArr, function(index, rep){
-        console.log(repArr)
-        // I don't think we need this nested call
         ace.callWithAce(function (ace){
           ace.ace_performSelectionChange(rep[0],rep[1],true);
           ace.ace_setAttributeOnSelection('insertEmbedPicture', 'embedRemoteImageSpanBig:'+url);
-          // Note that this is the correct way of doing it, instead of there being
-          // a linkId we now flag it as "link-deleted"
+
         });
       });
     }, "changeEmbedPicture");
