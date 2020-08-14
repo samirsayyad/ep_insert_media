@@ -45,6 +45,7 @@ $(document).ready(function () {
 
 
   $("#but_upload").click(function(){
+    var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
 
     var fd = new FormData();
     var files = $('#file')[0].files[0];
@@ -60,6 +61,14 @@ $(document).ready(function () {
             if(response != 0){
                 $("#img").attr("src",response); 
                 $(".preview img").show(); // Display image element
+                padeditor.ace.callWithAce(function (ace) {
+                  var rep = ace.ace_getRep();
+                  ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
+                  ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
+                  ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", escape(response)]]);
+                }, "insertEmbedPicture");
+                $("#embedMediaModal").removeClass("insertEmbedMedia-show");
+
             }else{
                 alert('file not uploaded');
             }
