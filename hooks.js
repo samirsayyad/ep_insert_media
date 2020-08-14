@@ -40,7 +40,7 @@ exports.expressConfigure = async function (hookName, context) {
     if (settings.ep_insert_media.storage.type =="min.io"){
         var minioClient = new Minio.Client({
             endPoint: settings.ep_insert_media.storage.endPoint, 
-            //port: settings.ep_insert_media.storage.port,
+            port: settings.ep_insert_media.storage.port,
             useSSL: settings.ep_insert_media.storage.useSSL,
             accessKey: settings.ep_insert_media.storage.accessKeyId,
             secretKey: settings.ep_insert_media.storage.secretAccessKey
