@@ -31,7 +31,7 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
 }
 
 exports.expressConfigure = async function (hookName, context) {
-  context.app.get('/p/getImage/:padId//:mediaId', function (req, res, next) {
+  context.app.get('/p/:padId/getImage/:mediaId', function (req, res, next) {
     var s3  = new AWS.S3({
         accessKeyId: settings.ep_insert_media.storage.accessKeyId,
         secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
@@ -46,7 +46,7 @@ exports.expressConfigure = async function (hookName, context) {
         res.end(null, 'binary');
     });
   })
-  context.app.get('/p/getVideo/:padId/:mediaId', function (req, res, next) {
+  context.app.get('/p/:padId/getVideo/:mediaId', function (req, res, next) {
     var s3  = new AWS.S3({
         accessKeyId: settings.ep_insert_media.storage.accessKeyId,
         secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
@@ -119,7 +119,9 @@ exports.expressConfigure = async function (hookName, context) {
         var newFileName = uuid.v4();
         var accessPath = '';
         busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
-            var savedFilename = path.join(padId, newFileName + path.extname(filename));
+            var fileType = path.extname(filename)
+            var finalFinalName = newFileName + fileType ;
+            var savedFilename = path.join(padId, newFileName + fileType);
 
             if (storageConfig && settings.ep_insert_media.storage.type === 'local') {
                 var baseURL = settings.ep_insert_media.storage.baseURL;
@@ -140,7 +142,6 @@ exports.expressConfigure = async function (hookName, context) {
                 busboy.emit('error', error);
             });
 
-            var fileType = path.extname(savedFilename)
 
             if (settings.ep_insert_media.storage.type =="s3"){
                 var params_upload = {
@@ -156,7 +157,7 @@ exports.expressConfigure = async function (hookName, context) {
                      console.log("Successfully uploaded data to testbucket/testobject");
 
                     if (data){
-                        return res.status(201).json({"error":false,fileName :savedFilename ,fileType:fileType})
+                        return res.status(201).json({"error":false,fileName :finalFinalName ,fileType:fileType})
                     }else{
                         return res.status(201).json({"error":err.stack})
                     }
