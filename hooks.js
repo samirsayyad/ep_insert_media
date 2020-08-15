@@ -34,7 +34,7 @@ exports.expressConfigure = async function (hookName, context) {
 
 
   context.app.post('/p/:padId/pluginfw/ep_insert_media/upload', function (req, res, next) {
-    console.log(settings)
+    //console.log(settings)
     var padId = req.params.padId;
     var storageConfig = settings.ep_insert_media.storage;
 
@@ -168,6 +168,8 @@ exports.expressConfigure = async function (hookName, context) {
                      console.log(err)
                     else   
                      console.log("Successfully uploaded data to testbucket/testobject");
+
+                     res.status(201).json(data)
                 });
 
                 // minioClient.makeBucket(settings.ep_insert_media.storage.bucket, 'us-east-1', function(err) {
