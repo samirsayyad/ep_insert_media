@@ -11,6 +11,8 @@ exports.aceAttribsToClasses = function(hook_name, args, cb) {
     return cb(["embedMedia:" + args.value]);
   if (args.key == 'insertEmbedPicture' && args.value != "")
   return cb(["insertEmbedPicture:" + args.value]);
+  if (args.key == 'insertEmbedVideo' && args.value != "")
+  return cb(["insertEmbedVideo:" + args.value]);
   // if (args.key == 'insertEmbedPicture' && args.value == "embedRemoteImageSpanBig")
   // return cb(["insertEmbedPictureBig:" + args.value]);
 };
@@ -33,30 +35,51 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
       return cb([{cls: clss.join(" "), extraOpenTags: "<span class='embedMedia'><span class='media'>" + exports.cleanEmbedCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
   }
   if (args.cls.indexOf('insertEmbedPicture:') >= 0) {
+      var clss = [];
+      var argClss = args.cls.split(" ");
+      var value;
+
+      for (var i = 0; i < argClss.length; i++) {
+        var cls = argClss[i];
+        if (cls.indexOf("insertEmbedPicture:") != -1) {
+          value = cls.substr(cls.indexOf(":")+1);
+        }
+        else {
+          clss.push(cls);
+        }
+      }
+      ////////////////////////////////
+      if (value.indexOf("embedRemoteImageSpanBig:") != -1){
+        
+        value = value.substr(value.indexOf(":")+1);
+        return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(value)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpanBig'><span class='image'>" + exports.cleanEmbedPictureCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+
+        
+      }else{
+        return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(value)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan'><span class='image'>" + exports.cleanEmbedPictureCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+
+      } 
+  }
+
+
+  //////////////////////////////////
+  if (args.cls.indexOf('insertEmbedVideo:') >= 0) {
     var clss = [];
     var argClss = args.cls.split(" ");
-     var value;
+    var value;
 
     for (var i = 0; i < argClss.length; i++) {
       var cls = argClss[i];
-      if (cls.indexOf("insertEmbedPicture:") != -1) {
-	      value = cls.substr(cls.indexOf(":")+1);
+      if (cls.indexOf("insertEmbedVideo:") != -1) {
+        value = cls.substr(cls.indexOf(":")+1);
       }
-       else {
-	      clss.push(cls);
+      else {
+        clss.push(cls);
       }
     }
+    value = value.substr(value.indexOf(":")+1);
+    return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(value)+"' id='emb_video-"+randomString(16)+"' class='embedRemoteVideoSpan'><span class='video'>" + exports.cleanEmbedVideoCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
 
-    if (value.indexOf("embedRemoteImageSpanBig:") != -1){
-      
-      value = value.substr(value.indexOf(":")+1);
-      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(value)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpanBig'><span class='image'>" + exports.cleanEmbedPictureCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
-
-      
-    }else{
-      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(value)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan'><span class='image'>" + exports.cleanEmbedPictureCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
-
-    }
   }
 
   return cb();
@@ -74,7 +97,7 @@ var filter = function (node) {
   if (node.children().length) {
     node.children().each(function () { filter(this); });
   }
-  if (!node.is("iframe,object,embed,param")) {
+  if (!node.is("iframe,object,embed,param,video")) {
     node.replaceWith(node.children().clone());
   }
 }
@@ -95,15 +118,19 @@ exports.sanitize = function (inputHtml) {
   html4.ELEMENTS.param = html4.eflags.UNSAFE; // NOT empty or we break stuff in some browsers...
 
   return html.sanitizeWithPolicy(inputHtml, function(tagName, attribs) {
-    if ($.inArray(tagName, ["embed", "object", "iframe", "param"]) == -1) {
+    if ($.inArray(tagName, ["embed", "object", "iframe", "param","video"]) == -1) {
       return null;
     }
     return attribs;
   });
 }
 
+exports.cleanEmbedVideoCode =  function(orig) {
+  var value = $.trim(orig);
+  return '<video width="320" height="240" autoplay><source src="'+value+'" type="video/mp4">Your browser does not support the video tag.</video>';
+}
 exports.cleanEmbedPictureCode = function(orig) {
-  value = $.trim(orig);
+  var value = $.trim(orig);
   return "<img class='embedRemoteImage' src='"+value+"'>";
 }
 

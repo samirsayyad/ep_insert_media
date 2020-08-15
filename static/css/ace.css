@@ -41,6 +41,7 @@
 
 }
 
+
 .embedRemoteImageSpan .character {
     /* Do not use display: none, or you'll break backspace for some reason! */
     font-size: 0;
@@ -54,3 +55,19 @@
 }
 
 
+
+.video{
+  object-fit: cover;
+
+}
+.embedRemoteVideoSpan{
+  display: inline-block;
+  line-height: 0;
+  width:100%;
+  cursor: pointer;
+}
+.embedRemoteVideoSpan .character {
+  /* Do not use display: none, or you'll break backspace for some reason! */
+  font-size: 0;
+  opacity: 0;
+}

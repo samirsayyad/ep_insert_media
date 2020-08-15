@@ -9,7 +9,7 @@ var path = require('path'),
     settings = require('ep_etherpad-lite/node/utils/Settings');
     Minio = require('minio');
     AWS = require('aws-sdk');
- 
+    
 exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_insert_media/templates/editbarButtons.ejs", {}, module);
   return cb();
@@ -31,7 +31,7 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
 }
 
 exports.expressConfigure = async function (hookName, context) {
-  context.app.get('/p/get/:padId/:imageId', function (req, res, next) {
+  context.app.get('/p/:padId/getImage/:mediaId', function (req, res, next) {
     var s3  = new AWS.S3({
         accessKeyId: settings.ep_insert_media.storage.accessKeyId,
         secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
@@ -39,35 +39,36 @@ exports.expressConfigure = async function (hookName, context) {
         s3ForcePathStyle: true, // needed with minio?
         signatureVersion: 'v4'
     });
-    var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.imageId}`  };
+    var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
     s3.getObject(params, function(err, data) {
         res.writeHead(200, {'Content-Type': 'image/jpeg'});
         res.write(data.Body, 'binary');
         res.end(null, 'binary');
     });
   })
-
+  context.app.get('/p/:padId/getVideo/:mediaId', function (req, res, next) {
+    var s3  = new AWS.S3({
+        accessKeyId: settings.ep_insert_media.storage.accessKeyId,
+        secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
+        endpoint: settings.ep_insert_media.storage.endPoint, 
+        s3ForcePathStyle: true, // needed with minio?
+        signatureVersion: 'v4'
+    });
+    var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
+    s3.getObject(params, function(err, data) {
+        res.writeHead(200, {'Content-Type': 'video/mp4'});
+        res.write(data.Body, 'binary');
+        res.end(null, 'binary');
+    });
+  })
 
   context.app.post('/p/:padId/pluginfw/ep_insert_media/upload', function (req, res, next) {
     console.log(settings.ep_insert_media)
     var padId = req.params.padId;
     var storageConfig = settings.ep_insert_media.storage;
 
-    if (settings.ep_insert_media.storage.type =="min.io"){
-        // var minioClient = new Minio.Client({
-        //     endPoint: settings.ep_insert_media.storage.endPoint, 
-        //     port: settings.ep_insert_media.storage.port,
-        //     useSSL: settings.ep_insert_media.storage.useSSL,
-        //     accessKey: settings.ep_insert_media.storage.accessKeyId,
-        //     secretKey: settings.ep_insert_media.storage.secretAccessKey
-        // });
-        console.log("we connected with ", {
-            accessKeyId: settings.ep_insert_media.storage.accessKeyId,
-            secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
-            endPoint: settings.ep_insert_media.storage.endPoint, 
-            s3ForcePathStyle: true, // needed with minio?
-            signatureVersion: 'v4'
-        })
+    if (settings.ep_insert_media.storage.type =="s3"){
+  
         var s3  = new AWS.S3({
             accessKeyId: settings.ep_insert_media.storage.accessKeyId,
             secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
@@ -75,12 +76,7 @@ exports.expressConfigure = async function (hookName, context) {
             s3ForcePathStyle: true, // needed with minio?
             signatureVersion: 'v4'
         });
-
-        // var minioClient = new Minio.Client({
-        //     url: 'https://78.46.16.197:9000',
-        //     accessKey: settings.ep_insert_media.storage.accessKeyId,
-        //     secretKey: settings.ep_insert_media.storage.secretAccessKey
-        //   })
+ 
     }else{
         var imageUpload = new StreamUpload({
             extensions: settings.ep_insert_media.fileTypes,
@@ -91,10 +87,6 @@ exports.expressConfigure = async function (hookName, context) {
   
           
     }
-
-
-
-
 
     if (storageConfig) {
         try {
@@ -109,18 +101,14 @@ exports.expressConfigure = async function (hookName, context) {
 
             return next(error);
         }
-
         var isDone;
         var done = function (error) {
             if (error) {
                 console.error('ep_insert_media UPLOAD ERROR', error);
-
                 return;
             }
-
             if (isDone) return;
             isDone = true;
-
             res.status(error.statusCode || 500).json(error);
             req.unpipe(busboy);
             drainStream(req);
@@ -152,27 +140,9 @@ exports.expressConfigure = async function (hookName, context) {
                 busboy.emit('error', error);
             });
 
-            if (settings.ep_insert_media.storage.type =="min.io"){
-                // Using fPutObject API upload your file to the bucket europetrip.
-                
-                // minioClient.putObject("samir", savedFilename,file, function(err, etag) {
-                //     if (err) console.log(err)
-                //     console.log('File uploaded successfully.',etag,err)
-                //     return res.status(201).json("val")
-                //   });
-                // var params = {
-                //     Bucket:  settings.ep_insert_media.storage.bucket,
-                //     CreateBucketConfiguration: {
-                //         // Set your region here
-                //         LocationConstraint: "eu-west-1"
-                //     }
-                // };
-                
-                // s3.createBucket(params, function(err, data) {
-                //     if (err) console.log(err, err.stack);
-                //     else console.log('Bucket Created Successfully', data.Location);
-                // });
+            var fileType = path.extname(savedFilename)
 
+            if (settings.ep_insert_media.storage.type =="s3"){
                 var params_upload = {
                     bucket: settings.ep_insert_media.storage.bucket,
                     Bucket: settings.ep_insert_media.storage.bucket,
@@ -181,30 +151,18 @@ exports.expressConfigure = async function (hookName, context) {
                 };
                 s3.upload(params_upload, function(err, data) {
                     if (err)
-                     console.log(err, err.stack,"roooorrrrrrr")
+                     console.log(err, err.stack,"error")
                     else   
                      console.log("Successfully uploaded data to testbucket/testobject");
 
-                    return res.status(201).json(data)
+                    if (data){
+                        return res.status(201).json({"error":false,fileName :savedFilename ,fileType:fileType})
+                    }else{
+                        return res.status(201).json({"error":err.stack})
+                    }
+                    
                 });
 
-                // minioClient.makeBucket(settings.ep_insert_media.storage.bucket, 'us-east-1', function(err) {
-                //     if (err) return console.log("error",err)
-                
-                //     console.log('Bucket created successfully in "us-east-1".')
-                
-                //     var metaData = {
-                //         'Content-Type': 'application/octet-stream',
-                //         'X-Amz-Meta-Testing': 1234,
-                //         'example': 5678
-                //     }
-                //     // Using fPutObject API upload your file to the bucket europetrip.
-                //     minioClient.fPutObject(settings.ep_insert_media.storage.bucket,savedFilename, file, metaData, function(err, etag) {
-                //       if (err) return console.log("error",err)
-                //       console.log('File uploaded successfully.')
-                //       return res.status(201).json(etag)
-                //     });
-                // });
 
             }else{
 
@@ -220,16 +178,15 @@ exports.expressConfigure = async function (hookName, context) {
                                 data = accessPath;
                             }
     
-                            return res.status(201).json(data);
+                            return res.status(201).json({"error":false,fileName : data, fileType:fileType});
                         })
                         .catch(function (err) {
-                            return res.status(500).json(err);
+                            return res.status(500).json({"error":err.stack});
                         });
                 }
     
             });
             }
-            
 
         });
 
