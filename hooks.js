@@ -159,6 +159,7 @@ exports.expressConfigure = async function (hookName, context) {
                 // });
 
                 var params_upload = {
+                    bucket: settings.ep_insert_media.storage.bucket,
                     Bucket: settings.ep_insert_media.storage.bucket,
                     Key: savedFilename, // File name you want to save as in S3
                     Body: file
