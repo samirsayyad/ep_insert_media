@@ -8,6 +8,7 @@ var path = require('path'),
     url = require('url');
     settings = require('ep_etherpad-lite/node/utils/Settings');
     Minio = require('minio');
+    AWS = require('aws-sdk');
  
 exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_insert_media/templates/editbarButtons.ejs", {}, module);
@@ -38,13 +39,21 @@ exports.expressConfigure = async function (hookName, context) {
     var storageConfig = settings.ep_insert_media.storage;
 
     if (settings.ep_insert_media.storage.type =="min.io"){
-        var minioClient = new Minio.Client({
+        // var minioClient = new Minio.Client({
+        //     endPoint: settings.ep_insert_media.storage.endPoint, 
+        //     port: settings.ep_insert_media.storage.port,
+        //     useSSL: settings.ep_insert_media.storage.useSSL,
+        //     accessKey: settings.ep_insert_media.storage.accessKeyId,
+        //     secretKey: settings.ep_insert_media.storage.secretAccessKey
+        // });
+        var s3  = new AWS.S3({
+            accessKeyId: settings.ep_insert_media.storage.accessKeyId,
+            secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
             endPoint: settings.ep_insert_media.storage.endPoint, 
-            port: settings.ep_insert_media.storage.port,
-            useSSL: settings.ep_insert_media.storage.useSSL,
-            accessKey: settings.ep_insert_media.storage.accessKeyId,
-            secretKey: settings.ep_insert_media.storage.secretAccessKey
+            s3ForcePathStyle: true, // needed with minio?
+            signatureVersion: 'v4'
         });
+
         // var minioClient = new Minio.Client({
         //     url: 'https://78.46.16.197:9000',
         //     accessKey: settings.ep_insert_media.storage.accessKeyId,
@@ -129,24 +138,48 @@ exports.expressConfigure = async function (hookName, context) {
                 //     console.log('File uploaded successfully.',etag,err)
                 //     return res.status(201).json("val")
                 //   });
-               
-                minioClient.makeBucket(settings.ep_insert_media.storage.bucket, 'us-east-1', function(err) {
-                    if (err) return console.log("error",err)
-                
-                    console.log('Bucket created successfully in "us-east-1".')
-                
-                    var metaData = {
-                        'Content-Type': 'application/octet-stream',
-                        'X-Amz-Meta-Testing': 1234,
-                        'example': 5678
+                var params = {
+                    Bucket:  settings.ep_insert_media.storage.bucket,
+                    CreateBucketConfiguration: {
+                        // Set your region here
+                        LocationConstraint: "eu-west-1"
                     }
-                    // Using fPutObject API upload your file to the bucket europetrip.
-                    minioClient.fPutObject(settings.ep_insert_media.storage.bucket,savedFilename, file, metaData, function(err, etag) {
-                      if (err) return console.log("error",err)
-                      console.log('File uploaded successfully.')
-                      return res.status(201).json(etag)
-                    });
+                };
+                
+                s3.createBucket(params, function(err, data) {
+                    if (err) console.log(err, err.stack);
+                    else console.log('Bucket Created Successfully', data.Location);
                 });
+
+                params_upload = {
+                    Bucket: settings.ep_insert_media.storage.bucket,
+                    Key: savedFilename, // File name you want to save as in S3
+                    Body: file
+                };
+                s3.upload(params_upload, function(err, data) {
+                    if (err)
+                     console.log(err)
+                    else   
+                     console.log("Successfully uploaded data to testbucket/testobject");
+                });
+
+                // minioClient.makeBucket(settings.ep_insert_media.storage.bucket, 'us-east-1', function(err) {
+                //     if (err) return console.log("error",err)
+                
+                //     console.log('Bucket created successfully in "us-east-1".')
+                
+                //     var metaData = {
+                //         'Content-Type': 'application/octet-stream',
+                //         'X-Amz-Meta-Testing': 1234,
+                //         'example': 5678
+                //     }
+                //     // Using fPutObject API upload your file to the bucket europetrip.
+                //     minioClient.fPutObject(settings.ep_insert_media.storage.bucket,savedFilename, file, metaData, function(err, etag) {
+                //       if (err) return console.log("error",err)
+                //       console.log('File uploaded successfully.')
+                //       return res.status(201).json(etag)
+                //     });
+                // });
 
             }else{
 
