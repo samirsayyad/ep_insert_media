@@ -56,7 +56,7 @@ exports.expressConfigure = async function (hookName, context) {
         var s3  = new AWS.S3({
             accessKeyId: settings.ep_insert_media.storage.accessKeyId,
             secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
-            endPoint: settings.ep_insert_media.storage.endPoint, 
+            endpoint: settings.ep_insert_media.storage.endPoint, 
             s3ForcePathStyle: true, // needed with minio?
             signatureVersion: 'v4'
         });
