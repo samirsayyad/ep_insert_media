@@ -16,6 +16,8 @@ exports.isVideo=  function (filename) {
       case '.avi':
       case '.mpg':
       case '.mp4':
+      case '.webm':
+
         // etc
         return true;
     }

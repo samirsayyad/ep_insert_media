@@ -63,11 +63,14 @@
 .embedRemoteVideoSpan{
   display: inline-block;
   line-height: 0;
-  width:100%;
+  width:50%;
   cursor: pointer;
 }
 .embedRemoteVideoSpan .character {
   /* Do not use display: none, or you'll break backspace for some reason! */
   font-size: 0;
   opacity: 0;
+}
+.videoClass{
+  width : 100%
 }

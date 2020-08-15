@@ -59,8 +59,12 @@ $(document).ready(function () {
         processData: false,
         success: function(response){
             if(response != 0){
+
                 if (isImage(response.fileType)){
-                  var image_url ='/p/getImage/'+response.fileName
+                  if (response.type =="s3")
+                    var image_url ='/p/getImage/'+response.fileName
+                  else
+                    var image_url =response.fileName
                   $("#img").attr("src",image_url); 
                   $(".preview img").show(); // Display image element
                   padeditor.ace.callWithAce(function (ace) {
@@ -70,7 +74,10 @@ $(document).ready(function () {
                     ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", escape(image_url)]]);
                   }, "insertEmbedPicture");
                 }if (isVideo(response.fileType)){
-                  var video_url ='/p/getVideo/'+response.fileName
+                  if (response.type =="s3")
+                    var video_url ='/p/getVideo/'+response.fileName
+                  else
+                    var video_url =response.fileName
 
                   padeditor.ace.callWithAce(function (ace) {
                     var rep = ace.ace_getRep();
@@ -79,6 +86,8 @@ $(document).ready(function () {
                     ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedVideo", escape(video_url)]]);
                   }, "insertEmbedVideo");
                 }
+              
+               
                 
                 $("#embedMediaModal").removeClass("insertEmbedMedia-show");
 
@@ -113,6 +122,8 @@ function isVideo (filename) {
     case '.avi':
     case '.mpg':
     case '.mp4':
+    case '.webm':
+
       // etc
       return true;
   }

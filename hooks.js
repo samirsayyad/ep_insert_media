@@ -147,7 +147,7 @@ exports.expressConfigure = async function (hookName, context) {
                 error.type = 'fileSize';
                 error.statusCode = 403;
                 busboy.emit('error', error);
-                imageUpload.deletePartials();
+                //imageUpload.deletePartials();
             });
             file.on('error', function (error) {
                 busboy.emit('error', error);
@@ -168,7 +168,7 @@ exports.expressConfigure = async function (hookName, context) {
                      console.log(data);
 
                     if (data){
-                        return res.status(201).json({"error":false,fileName :savedFilename ,fileType:fileType,data:data})
+                        return res.status(201).json({"type":settings.ep_insert_media.storage.type,"error":false,fileName :savedFilename ,fileType:fileType,data:data})
                     }else{
                         return res.status(201).json({"error":err.stack})
                     }
@@ -190,7 +190,7 @@ exports.expressConfigure = async function (hookName, context) {
                                 data = accessPath;
                             }
     
-                            return res.status(201).json({"error":false,fileName : data, fileType:fileType});
+                            return res.status(201).json({"type":settings.ep_insert_media.storage.type,"error":false,fileName : data, fileType:fileType});
                         })
                         .catch(function (err) {
                             return res.status(500).json({"error":err.stack});

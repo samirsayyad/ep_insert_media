@@ -127,7 +127,7 @@ exports.sanitize = function (inputHtml) {
 
 exports.cleanEmbedVideoCode =  function(orig) {
   var value = $.trim(orig);
-  return '<video width="320" height="240" autoplay><source src="'+value+'" type="video/mp4">Your browser does not support the video tag.</video>';
+  return '<video class="videoClass" controls autoplay><source src="'+value+'" type="video/mp4"></video>';
 }
 exports.cleanEmbedPictureCode = function(orig) {
   var value = $.trim(orig);
