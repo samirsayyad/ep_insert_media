@@ -165,10 +165,10 @@ exports.expressConfigure = async function (hookName, context) {
                     if (err)
                      console.log(err, err.stack,"error")
                     else   
-                     console.log("Successfully uploaded data to testbucket/testobject");
+                     console.log(data);
 
                     if (data){
-                        return res.status(201).json({"error":false,fileName :savedFilename ,fileType:fileType})
+                        return res.status(201).json({"error":false,fileName :savedFilename ,fileType:fileType,data:data})
                     }else{
                         return res.status(201).json({"error":err.stack})
                     }
