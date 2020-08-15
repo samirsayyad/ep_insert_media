@@ -31,6 +31,21 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
 }
 
 exports.expressConfigure = async function (hookName, context) {
+  context.app.get('/p/get/:padId/:imageId', function (req, res, next) {
+    var s3  = new AWS.S3({
+        accessKeyId: settings.ep_insert_media.storage.accessKeyId,
+        secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
+        endpoint: settings.ep_insert_media.storage.endPoint, 
+        s3ForcePathStyle: true, // needed with minio?
+        signatureVersion: 'v4'
+    });
+    var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.imageId}`  };
+    s3.getObject(params, function(err, data) {
+        res.writeHead(200, {'Content-Type': 'image/jpeg'});
+        res.write(data.Body, 'binary');
+        res.end(null, 'binary');
+    });
+  })
 
 
   context.app.post('/p/:padId/pluginfw/ep_insert_media/upload', function (req, res, next) {
