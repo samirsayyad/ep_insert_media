@@ -165,11 +165,11 @@ exports.expressConfigure = async function (hookName, context) {
                 };
                 s3.upload(params_upload, function(err, data) {
                     if (err)
-                     console.log(err)
+                     console.log(err, err.stack,"roooorrrrrrr")
                     else   
                      console.log("Successfully uploaded data to testbucket/testobject");
 
-                     res.status(201).json(data)
+                    return res.status(201).json(data)
                 });
 
                 // minioClient.makeBucket(settings.ep_insert_media.storage.bucket, 'us-east-1', function(err) {
