@@ -34,7 +34,7 @@ exports.expressConfigure = async function (hookName, context) {
 
 
   context.app.post('/p/:padId/pluginfw/ep_insert_media/upload', function (req, res, next) {
-    //console.log(settings)
+    console.log(settings.ep_insert_media)
     var padId = req.params.padId;
     var storageConfig = settings.ep_insert_media.storage;
 
