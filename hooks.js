@@ -41,9 +41,15 @@ exports.expressConfigure = async function (hookName, context) {
     });
     var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
     s3.getObject(params, function(err, data) {
-        res.writeHead(200, {'Content-Type': 'image/jpeg'});
-        res.write(data.Body, 'binary');
-        res.end(null, 'binary');
+        if (data ){
+            res.writeHead(200, {'Content-Type': 'image/jpeg'});
+            res.write(data.Body, 'binary');
+            res.end(null, 'binary');
+        }else{
+            res.end(null, 'binary');
+
+        }
+        
     });
   })
   context.app.get('/p/:padId/getVideo/:mediaId', function (req, res, next) {
@@ -56,9 +62,13 @@ exports.expressConfigure = async function (hookName, context) {
     });
     var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
     s3.getObject(params, function(err, data) {
-        res.writeHead(200, {'Content-Type': 'video/mp4'});
-        res.write(data.Body, 'binary');
-        res.end(null, 'binary');
+        if (data){
+            res.writeHead(200, {'Content-Type': 'video/mp4'});
+            res.write(data.Body, 'binary');
+            res.end(null, 'binary');
+        }else{
+            res.end(null, 'binary');
+        }
     });
   })
 
