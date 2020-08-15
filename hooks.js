@@ -31,7 +31,7 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
 }
 
 exports.expressConfigure = async function (hookName, context) {
-  context.app.get('/p/:padId/getImage/:mediaId', function (req, res, next) {
+  context.app.get('/p/:padId/pluginfw/ep_insert_media/getImage/:mediaId', function (req, res, next) {
     var s3  = new AWS.S3({
         accessKeyId: settings.ep_insert_media.storage.accessKeyId,
         secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
@@ -52,7 +52,7 @@ exports.expressConfigure = async function (hookName, context) {
         
     });
   })
-  context.app.get('/p/:padId/getVideo/:mediaId', function (req, res, next) {
+  context.app.get('/p/:padId/pluginfw/ep_insert_media/getVideo/:mediaId', function (req, res, next) {
     var s3  = new AWS.S3({
         accessKeyId: settings.ep_insert_media.storage.accessKeyId,
         secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
