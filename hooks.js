@@ -46,6 +46,13 @@ exports.expressConfigure = async function (hookName, context) {
         //     accessKey: settings.ep_insert_media.storage.accessKeyId,
         //     secretKey: settings.ep_insert_media.storage.secretAccessKey
         // });
+        console.log("we connected with ", {
+            accessKeyId: settings.ep_insert_media.storage.accessKeyId,
+            secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
+            endPoint: settings.ep_insert_media.storage.endPoint, 
+            s3ForcePathStyle: true, // needed with minio?
+            signatureVersion: 'v4'
+        })
         var s3  = new AWS.S3({
             accessKeyId: settings.ep_insert_media.storage.accessKeyId,
             secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
@@ -138,20 +145,20 @@ exports.expressConfigure = async function (hookName, context) {
                 //     console.log('File uploaded successfully.',etag,err)
                 //     return res.status(201).json("val")
                 //   });
-                var params = {
-                    Bucket:  settings.ep_insert_media.storage.bucket,
-                    CreateBucketConfiguration: {
-                        // Set your region here
-                        LocationConstraint: "eu-west-1"
-                    }
-                };
+                // var params = {
+                //     Bucket:  settings.ep_insert_media.storage.bucket,
+                //     CreateBucketConfiguration: {
+                //         // Set your region here
+                //         LocationConstraint: "eu-west-1"
+                //     }
+                // };
                 
-                s3.createBucket(params, function(err, data) {
-                    if (err) console.log(err, err.stack);
-                    else console.log('Bucket Created Successfully', data.Location);
-                });
+                // s3.createBucket(params, function(err, data) {
+                //     if (err) console.log(err, err.stack);
+                //     else console.log('Bucket Created Successfully', data.Location);
+                // });
 
-                params_upload = {
+                var params_upload = {
                     Bucket: settings.ep_insert_media.storage.bucket,
                     Key: savedFilename, // File name you want to save as in S3
                     Body: file
