@@ -41,6 +41,7 @@ exports.expressConfigure = async function (hookName, context) {
     });
     var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
     s3.getObject(params, function(err, data) {
+        console.log("data going to be ", params ,data , err)
         if (data ){
             res.writeHead(200, {'Content-Type': 'image/jpeg'});
             res.write(data.Body, 'binary');
