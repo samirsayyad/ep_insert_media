@@ -60,7 +60,7 @@ $(document).ready(function () {
         success: function(response){
             if(response != 0){
                 if (isImage(response.fileType)){
-                  var image_url ='/p/' + clientVars.padId + '/pluginfw/ep_insert_media/getImage/'+response.fileName
+                  var image_url ='/p/getImage/'+response.fileName
                   $("#img").attr("src",image_url); 
                   $(".preview img").show(); // Display image element
                   padeditor.ace.callWithAce(function (ace) {
@@ -70,7 +70,7 @@ $(document).ready(function () {
                     ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", escape(image_url)]]);
                   }, "insertEmbedPicture");
                 }if (isVideo(response.fileType)){
-                  var video_url ='/p/' + clientVars.padId + '/pluginfw/ep_insert_media/getVideo/'+response.fileName
+                  var video_url ='/p/getVideo/'+response.fileName
 
                   padeditor.ace.callWithAce(function (ace) {
                     var rep = ace.ace_getRep();
