@@ -13,6 +13,8 @@ exports.aceAttribsToClasses = function(hook_name, args, cb) {
   return cb(["insertEmbedPicture:" + args.value]);
   if (args.key == 'insertEmbedVideo' && args.value != "")
   return cb(["insertEmbedVideo:" + args.value]);
+  if (args.key == 'insertEmbedAudio' && args.value != "")
+  return cb(["insertEmbedAudio:" + args.value]);
   // if (args.key == 'insertEmbedPicture' && args.value == "embedRemoteImageSpanBig")
   // return cb(["insertEmbedPictureBig:" + args.value]);
 };
@@ -82,6 +84,29 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
 
   }
 
+
+
+
+  //////////////////////////////////
+  if (args.cls.indexOf('insertEmbedAudio:') >= 0) {
+    var clss = [];
+    var argClss = args.cls.split(" ");
+    var value;
+
+    for (var i = 0; i < argClss.length; i++) {
+      var cls = argClss[i];
+      if (cls.indexOf("insertEmbedAudio:") != -1) {
+        value = cls.substr(cls.indexOf(":")+1);
+      }
+      else {
+        clss.push(cls);
+      }
+    }
+    value = value.substr(value.indexOf(":")+1);
+    return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(value)+"' id='emb_audio-"+randomString(16)+"' class='embedRemoteAudioSpan'><span class='audio'>" + exports.cleanEmbedAudioCode(unescape(value)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+
+  }
+
   return cb();
 };
 
@@ -125,6 +150,10 @@ exports.sanitize = function (inputHtml) {
   });
 }
 
+exports.cleanEmbedAudioCode =  function(orig) {
+  var value = $.trim(orig);
+  return '<audio class="audioClass" controls autoplay><source src="'+value+'" type="audio/mpeg"></video>';
+}
 exports.cleanEmbedVideoCode =  function(orig) {
   var value = $.trim(orig);
   return '<video class="videoClass" controls autoplay><source src="'+value+'" type="video/mp4"></video>';

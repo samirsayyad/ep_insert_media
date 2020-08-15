@@ -58,7 +58,7 @@ $(document).ready(function () {
         contentType: false,
         processData: false,
         success: function(response){
-            if(response != 0){
+            if(response&&response.error==false ){
 
                 if (isImage(response.fileType)){
                   if (response.type =="s3")
@@ -85,6 +85,18 @@ $(document).ready(function () {
                     ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
                     ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedVideo", escape(video_url)]]);
                   }, "insertEmbedVideo");
+                }if (isAudio(response.fileType)){
+                  if (response.type =="s3")
+                    var audio_url ='/p/getMedia/'+response.fileName
+                  else
+                    var audio_url =response.fileName
+
+                  padeditor.ace.callWithAce(function (ace) {
+                    var rep = ace.ace_getRep();
+                    ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
+                    ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
+                    ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedAudio", escape(audio_url)]]);
+                  }, "insertEmbedAudio");
                 }
               
                
@@ -92,7 +104,7 @@ $(document).ready(function () {
                 $("#embedMediaModal").removeClass("insertEmbedMedia-show");
 
             }else{
-                alert('file not uploaded');
+                alert('file not uploaded because '+response.error);
             }
         },
     });
@@ -123,6 +135,22 @@ function isVideo (filename) {
     case '.mpg':
     case '.mp4':
     case '.webm':
+
+      // etc
+      return true;
+  }
+  return false;
+}
+
+function isAudio (filename) {
+  switch (filename.toLowerCase()) {
+    case '.mp3':
+    case '.ogg':
+    case '.m4a':
+    case '.flac':
+    case '.wav':
+    case '.wma':
+    case '.aac':
 
       // etc
       return true;

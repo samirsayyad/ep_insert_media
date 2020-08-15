@@ -7,6 +7,7 @@
   "dependencies": {
     "busboy": "^0.3.1",
     "mime-db": "^1.44.0",
+    "mime-types": "^2.1.27",
     "minio": "^7.0.16",
     "path": "^0.12.7",
     "stream_upload": "^0.0.5",

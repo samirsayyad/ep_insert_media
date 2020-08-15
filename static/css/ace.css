@@ -74,3 +74,26 @@
 .videoClass{
   width : 100%
 }
+
+
+
+
+
+.audio{
+  object-fit: cover;
+
+}
+.embedRemoteAudioSpan{
+  display: inline-block;
+  line-height: 0;
+  width:50%;
+  cursor: pointer;
+}
+.embedRemoteAudioSpan .character {
+  /* Do not use display: none, or you'll break backspace for some reason! */
+  font-size: 0;
+  opacity: 0;
+}
+.audioClass{
+  width : 100%
+}

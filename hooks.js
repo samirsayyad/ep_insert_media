@@ -9,7 +9,7 @@ var path = require('path'),
     settings = require('ep_etherpad-lite/node/utils/Settings');
     Minio = require('minio');
     AWS = require('aws-sdk');
-    
+    mime = require('mime-types')
 exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_insert_media/templates/editbarButtons.ejs", {}, module);
   return cb();
@@ -73,6 +73,29 @@ exports.expressConfigure = async function (hookName, context) {
     });
   })
 
+ 
+
+
+  context.app.get('/p/getMedia/:padId/:mediaId', function (req, res, next) {
+    var s3  = new AWS.S3({
+        accessKeyId: settings.ep_insert_media.storage.accessKeyId,
+        secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
+        endpoint: settings.ep_insert_media.storage.endPoint, 
+        s3ForcePathStyle: true, // needed with minio?
+        signatureVersion: 'v4'
+    });
+    var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
+    s3.getObject(params, function(err, data) {
+        if (data){
+            res.writeHead(200, {'Content-Type': mime.lookup(req.params.mediaId)});
+            res.write(data.Body, 'binary');
+            res.end(null, 'binary');
+        }else{
+            res.end(null, 'binary');
+        }
+    });
+  })
+
   context.app.post('/p/:padId/pluginfw/ep_insert_media/upload', function (req, res, next) {
     console.log(settings.ep_insert_media)
     var padId = req.params.padId;
@@ -115,15 +138,16 @@ exports.expressConfigure = async function (hookName, context) {
         var isDone;
         var done = function (error) {
             if (error) {
-                console.error('ep_insert_media UPLOAD ERROR', error);
+                console.log('ep_insert_media UPLOAD ERROR', error);
                 return;
             }
             if (isDone) return;
             isDone = true;
-            res.status(error.statusCode || 500).json(error);
             req.unpipe(busboy);
             drainStream(req);
             busboy.removeAllListeners();
+            return res.status(201).json({"error":error.stack})
+
         };
 
         var uploadResult;
@@ -131,7 +155,8 @@ exports.expressConfigure = async function (hookName, context) {
         var accessPath = '';
         busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
             var fileType = path.extname(filename)
-            var finalFinalName = newFileName + fileType ;
+            var fileTypeWithoutDot = fileType.substr(1);
+
             var savedFilename = path.join(padId, newFileName + fileType);
 
             if (storageConfig && settings.ep_insert_media.storage.type === 'local') {
@@ -143,11 +168,12 @@ exports.expressConfigure = async function (hookName, context) {
                 savedFilename = path.join(settings.ep_insert_media.storage.baseFolder, savedFilename);
             }
             file.on('limit', function () {
-                var error = new Error('File is too large');
-                error.type = 'fileSize';
-                error.statusCode = 403;
-                busboy.emit('error', error);
+                // var error = new Error('File is too large');
+                // error.type = 'fileSize';
+                // error.statusCode = 403;
+                // busboy.emit('error', error);
                 //imageUpload.deletePartials();
+                return res.status(201).json({"error":"File is too large"})
             });
             file.on('error', function (error) {
                 busboy.emit('error', error);
@@ -163,42 +189,52 @@ exports.expressConfigure = async function (hookName, context) {
                 };
                 s3.upload(params_upload, function(err, data) {
                     if (err)
-                     console.log(err, err.stack,"error")
+                        console.log(err, err.stack,"error")
                     else   
-                     console.log(data);
+                        console.log(data);
 
                     if (data){
                         return res.status(201).json({"type":settings.ep_insert_media.storage.type,"error":false,fileName :savedFilename ,fileType:fileType,data:data})
                     }else{
-                        return res.status(201).json({"error":err.stack})
+                        return res.status(201).json({"error":err})
                     }
                     
                 });
 
 
             }else{
+                console.log(imageUpload)
 
-                uploadResult = imageUpload
-                .upload(file, {type: mimetype, filename: savedFilename});
-                busboy.on('error', done);
-                busboy.on('finish', function () {
-                if (uploadResult) {
-                    uploadResult
-                        .then(function (data) {
-    
-                            if (accessPath) {
-                                data = accessPath;
-                            }
-    
-                            return res.status(201).json({"type":settings.ep_insert_media.storage.type,"error":false,fileName : data, fileType:fileType});
-                        })
-                        .catch(function (err) {
-                            return res.status(500).json({"error":err.stack});
-                        });
+                try {
+                    uploadResult = imageUpload.upload(file, {type: mimetype, filename: savedFilename});
+                    busboy.on('error', done);
+                    busboy.on('finish', function () {
+                    if (uploadResult) {
+                        console.log("uploadResult",uploadResult)
+                        uploadResult
+                            .then(function (data) {
+        
+                                if (accessPath) {
+                                    data = accessPath;
+                                }
+        
+                                return res.status(201).json({"type":settings.ep_insert_media.storage.type,"error":false,fileName : data, fileType:fileType});
+                            })
+                            .catch(function (err) {
+                                return res.status(201).json({"error":err.stack});
+                            });
+                    }
+        
+                });
+                }catch(error){
+                    console.log(error)
+                    return res.status(201).json({"error":"unknown type"})
+
                 }
-    
-            });
+            
             }
+           
+            
 
         });
 
