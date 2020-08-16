@@ -67,6 +67,9 @@ $("#file").change(function(){
          img.src = url;
        
       }
+
+      $("#embedMediaSrc").val("")
+
     }else{
       uploadAction()
     }
