@@ -40,7 +40,7 @@ $("#file").change(function(){
     if($("#embedMediaSrc")[0].value !=""){
       var value =$("#embedMediaSrc")[0].value ;
       if (value.indexOf('http://') == 0 || value.indexOf('https://') == 0) {
-        if (value.indexOf("www.youtube.com") != -1 || value.indexOf("vimeo.com") != -1) {
+        if (value.indexOf("www.youtube.com") != -1 || value.indexOf("youtu.be") != -1 || value.indexOf("vimeo.com") != -1) {
           return padeditor.ace.callWithAce(function (ace) {
             var rep = ace.ace_getRep();
             ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
