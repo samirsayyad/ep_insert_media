@@ -22,6 +22,20 @@
 #myform{
   padding-bottom: 5%;
 }
+#mediaSizeSelect{
+  padding-top: 5%;
+}
+div.btnMediaSize {
+  display: inline-block;
+  border: 2px solid #ccc;
+  margin-right: 5px;
+  padding: 2px 5px;
+  cursor: pointer;
+}
+div.btnMediaSize.on {
+  background-color: #777;
+  color: white;
+}
 .embedMediaButton {
   padding:10px;
 }

@@ -1,5 +1,22 @@
 $(document).ready(function () {
 
+//   $("#mediaSizeSelect option").unwrap().each(function() {
+//     console.log("d",$(this))
+//     var btn = $('<div class="btnMediaSize">'+$(this).text()+'</div>');
+//     if($(this).selected) btn.addClass('on');
+//     $(this).replaceWith(btn);
+// });
+
+//   $(document).on('click', '.btnMediaSize', function() {
+//       $('.btnMediaSize').removeClass('on');
+//       $(this).addClass('on');
+//   });
+
+
+$("#file").change(function(){
+  $("#embedMediaSrc").val("")
+})
+
   $("#insertEmbedMedia").click(function () {
     // Can not use this yet, fix in main etherpad
     // padeditbar.toogleDropDown("embedMediaModal");
@@ -31,13 +48,24 @@ $(document).ready(function () {
             ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["embedMedia", escape($("#embedMediaSrc")[0].value)]]);
           }, "embedMedia");
         }else{
-          return padeditor.ace.callWithAce(function (ace) {
-            var rep = ace.ace_getRep();
-            ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
-            ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", escape($("#embedMediaSrc")[0].value)]]);
-          }, "insertEmbedPicture");
-        }
+          var img = new Image();
+          var url = $("#embedMediaSrc")[0].value;
+
+          img.onload = function(){
+            return padeditor.ace.callWithAce(function (ace) {
+              var rep = ace.ace_getRep();
+              ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
+              ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
+              ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", escape($("#embedMediaSrc")[0].value)]]);
+            }, "insertEmbedPicture");
+          }  
+          };
+          img.onerror = function(){
+              alert("Error on loading image...");   
+          }
+        
+         img.src = url;
+       
       }
     }else{
       uploadAction()
@@ -109,7 +137,7 @@ $(document).ready(function () {
                
                 
                 $("#embedMediaModal").removeClass("insertEmbedMedia-show");
-
+                $("#file").val("")
             }else{
                 alert('file not uploaded because '+response.error);
             }
