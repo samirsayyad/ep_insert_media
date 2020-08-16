@@ -15,24 +15,33 @@ $(document).ready(function () {
   $("#doEmbedMedia").click(function () {
     var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
 
+    
     //$("#embedMediaModal").slideUp("fast");
     $("#embedMediaModal").removeClass("insertEmbedMedia-show");
-    if($("#embedMediaSrc")[0].value !=""){
-      return padeditor.ace.callWithAce(function (ace) {
-        var rep = ace.ace_getRep();
-        ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
-        ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-        ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["embedMedia", escape($("#embedMediaSrc")[0].value)]]);
-      }, "embedMedia");
-    }else{
-      return padeditor.ace.callWithAce(function (ace) {
-        var rep = ace.ace_getRep();
-        ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
-        ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-        ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", escape($("#embedPictureSrc")[0].value)]]);
-      }, "insertEmbedPicture");
-    }
 
+
+    if($("#embedMediaSrc")[0].value !=""){
+      var value =$("#embedMediaSrc")[0].value ;
+      if (value.indexOf('http://') == 0 || value.indexOf('https://') == 0) {
+        if (value.indexOf("www.youtube.com") != -1 || value.indexOf("vimeo.com") != -1) {
+          return padeditor.ace.callWithAce(function (ace) {
+            var rep = ace.ace_getRep();
+            ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
+            ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
+            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["embedMedia", escape($("#embedMediaSrc")[0].value)]]);
+          }, "embedMedia");
+        }else{
+          return padeditor.ace.callWithAce(function (ace) {
+            var rep = ace.ace_getRep();
+            ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
+            ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
+            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", escape($("#embedMediaSrc")[0].value)]]);
+          }, "insertEmbedPicture");
+        }
+      }
+    }else{
+      uploadAction()
+    }
     
   });
 
@@ -42,9 +51,9 @@ $(document).ready(function () {
   });
 
 
+})
 
-
-  $("#but_upload").click(function(){
+  function uploadAction(){
     var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
 
     var fd = new FormData();
@@ -65,8 +74,6 @@ $(document).ready(function () {
                     var image_url ='/p/getImage/'+response.fileName
                   else
                     var image_url =response.fileName
-                  $("#img").attr("src",image_url); 
-                  $(".preview img").show(); // Display image element
                   padeditor.ace.callWithAce(function (ace) {
                     var rep = ace.ace_getRep();
                     ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
@@ -108,13 +115,12 @@ $(document).ready(function () {
             }
         },
     });
-  });
+  } 
 
 
 
 
-});
-
+ 
 
 function isImage (filename) {
   switch (filename.toLowerCase()) {

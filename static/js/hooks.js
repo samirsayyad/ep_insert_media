@@ -152,11 +152,11 @@ exports.sanitize = function (inputHtml) {
 
 exports.cleanEmbedAudioCode =  function(orig) {
   var value = $.trim(orig);
-  return '<audio class="audioClass" controls autoplay><source src="'+value+'" type="audio/mpeg"></video>';
+  return '<audio class="audioClass" controls><source src="'+value+'" type="audio/mpeg"></video>';
 }
 exports.cleanEmbedVideoCode =  function(orig) {
   var value = $.trim(orig);
-  return '<video class="videoClass" controls autoplay><source src="'+value+'" type="video/mp4"></video>';
+  return '<video class="videoClass" controls><source src="'+value+'" type="video/mp4"></video>';
 }
 exports.cleanEmbedPictureCode = function(orig) {
   var value = $.trim(orig);

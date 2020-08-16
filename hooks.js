@@ -7,7 +7,6 @@ var path = require('path'),
     mimetypes = require('mime-db');
     url = require('url');
     settings = require('ep_etherpad-lite/node/utils/Settings');
-    Minio = require('minio');
     AWS = require('aws-sdk');
     mime = require('mime-types')
 exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
