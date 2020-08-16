@@ -1,21 +1,24 @@
 $(document).ready(function () {
+  var first =true;
+  $("#mediaSizeSelect option").unwrap().each(function() {
+    var btn = $('<div class="btnMediaSize">'+$(this).text()+'</div>');
+    if(first){
+      btn.addClass('on');
+      first=false;
+    } 
+    $(this).replaceWith(btn);
+});
 
-//   $("#mediaSizeSelect option").unwrap().each(function() {
-//     console.log("d",$(this))
-//     var btn = $('<div class="btnMediaSize">'+$(this).text()+'</div>');
-//     if($(this).selected) btn.addClass('on');
-//     $(this).replaceWith(btn);
-// });
-
-//   $(document).on('click', '.btnMediaSize', function() {
-//       $('.btnMediaSize').removeClass('on');
-//       $(this).addClass('on');
-//   });
+  $(document).on('click', '.btnMediaSize', function() {
+      $('.btnMediaSize').removeClass('on');
+      $(this).addClass('on');
+      $("#selectedSize").val($(this).text())
+  });
 
 
-$("#file").change(function(){
-  $("#embedMediaSrc").val("")
-})
+  $("#file").change(function(){
+    $("#embedMediaSrc").val("")
+  })
 
   $("#insertEmbedMedia").click(function () {
     // Can not use this yet, fix in main etherpad
@@ -31,7 +34,7 @@ $("#file").change(function(){
 
   $("#doEmbedMedia").click(function () {
     var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
-
+    console.log($("#mediaSizeSelect btnMediaSize on").text(),"wwwwwwwwwwwww")
     
     //$("#embedMediaModal").slideUp("fast");
     $("#embedMediaModal").removeClass("insertEmbedMedia-show");
