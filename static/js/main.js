@@ -32,32 +32,37 @@ $(document).ready(function () {
 
   $("#doEmbedMedia").click(function () {
     var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
-    console.log($("#mediaSizeSelect btnMediaSize on").text(),"wwwwwwwwwwwww")
+    //console.log($("#mediaSizeSelect btnMediaSize on").text(),"wwwwwwwwwwwww")
     
     //$("#embedMediaModal").slideUp("fast");
     $("#embedMediaModal").removeClass("insertEmbedMedia-show");
-
-
-    if($("#embedMediaSrc")[0].value !=""){
-      var value =$("#embedMediaSrc")[0].value ;
-      if (value.indexOf('http://') == 0 || value.indexOf('https://') == 0) {
-        if (value.indexOf("www.youtube.com") != -1 || value.indexOf("youtu.be") != -1 || value.indexOf("vimeo.com") != -1) {
+    var url =$("#embedMediaSrc")[0].value
+    var imageSize =$("#selectedSize").val()
+    var imageAlign =$("#selectedAlign").val()
+    var imageUrl = escape(url) ;
+    var mediaData = {
+      "url" : imageUrl,
+      "align" : imageAlign,
+      "size" : imageSize
+    }
+     if(url!=""){
+      if (url.indexOf('http://') == 0 || url.indexOf('https://') == 0) {
+        if (url.indexOf("www.youtube.com") != -1 || url.indexOf("youtu.be") != -1 || url.indexOf("vimeo.com") != -1) {
           return padeditor.ace.callWithAce(function (ace) {
             var rep = ace.ace_getRep();
             ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
             ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["embedMedia", escape($("#embedMediaSrc")[0].value)]]);
+            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["embedMedia", JSON.stringify(mediaData)]]);
           }, "embedMedia");
         }else{
           var img = new Image();
-          var url = $("#embedMediaSrc")[0].value;
-
+        
           img.onload = function(){
             return padeditor.ace.callWithAce(function (ace) {
               var rep = ace.ace_getRep();
               ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
               ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-              ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", escape($("#embedMediaSrc")[0].value)]]);
+              ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", JSON.stringify(mediaData)]]);
             }, "insertEmbedPicture");
           }  
           };
@@ -72,7 +77,7 @@ $(document).ready(function () {
       $("#embedMediaSrc").val("")
 
     }else{
-      uploadAction()
+      uploadAction(mediaData)
     }
     
   });
@@ -85,13 +90,12 @@ $(document).ready(function () {
 
 })
 
-  function uploadAction(){
+  function uploadAction(mediaData){
     var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
 
     var fd = new FormData();
     var files = $('#file')[0].files[0];
     fd.append('file',files);
-
     $.ajax({
         url: '/p/' + clientVars.padId + '/pluginfw/ep_insert_media/upload',
         type: 'post',
@@ -106,35 +110,38 @@ $(document).ready(function () {
                     var image_url ='/p/getImage/'+response.fileName
                   else
                     var image_url =response.fileName
+                  mediaData.url =  escape(image_url) ;
                   padeditor.ace.callWithAce(function (ace) {
                     var rep = ace.ace_getRep();
                     ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
                     ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-                    ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", escape(image_url)]]);
+                    ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", JSON.stringify(mediaData)]]);
                   }, "insertEmbedPicture");
                 }if (isVideo(response.fileType)){
                   if (response.type =="s3")
                     var video_url ='/p/getVideo/'+response.fileName
                   else
                     var video_url =response.fileName
+                    mediaData.url =  escape(video_url) ;
 
                   padeditor.ace.callWithAce(function (ace) {
                     var rep = ace.ace_getRep();
                     ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
                     ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-                    ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedVideo", escape(video_url)]]);
+                    ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedVideo", JSON.stringify(mediaData)]]);
                   }, "insertEmbedVideo");
                 }if (isAudio(response.fileType)){
                   if (response.type =="s3")
                     var audio_url ='/p/getMedia/'+response.fileName
                   else
                     var audio_url =response.fileName
+                    mediaData.url =  escape(audio_url) ;
 
                   padeditor.ace.callWithAce(function (ace) {
                     var rep = ace.ace_getRep();
                     ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
                     ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-                    ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedAudio", escape(audio_url)]]);
+                    ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedAudio", JSON.stringify(mediaData)]]);
                   }, "insertEmbedAudio");
                 }
               
@@ -160,6 +167,8 @@ function isImage (filename) {
     case '.gif':
     case '.bmp':
     case '.png':
+    case '.jpeg':
+
       //etc
       return true;
   }

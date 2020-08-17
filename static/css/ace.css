@@ -1,8 +1,10 @@
 .embedMedia {
-  border: 2px solid #bbbbbb;
-  margin: 2px;
+
   display: inline-block;
   line-height: 0;
+  position: relative;
+  /* height: 0; */
+  width: 790px;
 }
 
 .embedMedia .media {
@@ -17,48 +19,35 @@
   font-size: 0;
   opacity: 0;
 }
+  /* ------------------------------------------------------------------- */
+
 .embedRemoteImageSpan{
   display: inline-block;
   line-height: 0;
   width:50%;
   cursor: pointer;
 }
-
 .embedRemoteImage{
   width: 100%;
   object-fit: cover;
 
 }
-.embedRemoteImageSpanBig{
-  display: inline-block;
-  line-height: 0;
-  width:100%;
-  cursor: pointer;
-
-}
 .image{
   object-fit: cover;
-
+  width: 100%;
 }
 
 
 .embedRemoteImageSpan .character {
-    /* Do not use display: none, or you'll break backspace for some reason! */
     font-size: 0;
     opacity: 0;
 }
-
-.embedRemoteImageSpanBig .character {
-  /* Do not use display: none, or you'll break backspace for some reason! */
-  font-size: 0;
-  opacity: 0;
-}
-
-
+  /* ------------------------------------------------------------------- */
 
 .video{
   object-fit: cover;
-
+  width: 100%;
+  height: 100%;
 }
 .embedRemoteVideoSpan{
   display: inline-block;
@@ -67,7 +56,6 @@
   cursor: pointer;
 }
 .embedRemoteVideoSpan .character {
-  /* Do not use display: none, or you'll break backspace for some reason! */
   font-size: 0;
   opacity: 0;
 }
@@ -75,9 +63,7 @@
   width : 100%
 }
 
-
-
-
+  /* ------------------------------------------------------------------- */
 
 .audio{
   object-fit: cover;
@@ -90,10 +76,37 @@
   cursor: pointer;
 }
 .embedRemoteAudioSpan .character {
-  /* Do not use display: none, or you'll break backspace for some reason! */
   font-size: 0;
   opacity: 0;
 }
 .audioClass{
   width : 100%
+}
+
+.ep_insert_media_Left {
+  float: left;
+}
+.ep_insert_media_Right {
+  float: right;
+}
+.ep_insert_media_Center {
+  margin: auto;
+  display: block;
+}
+
+.ep_insert_media_Small{
+  width: 25% !important;
+
+}
+.ep_insert_media_Medium {
+  width: 50% !important;
+
+}
+.ep_insert_media_Large {
+  width: 100% !important;
+
+}
+.media{
+  width: 100%;
+  padding: 0 !important;
 }
