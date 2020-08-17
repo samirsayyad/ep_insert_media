@@ -33,16 +33,23 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
 	      clss.push(cls);
       }
     }
-    var mediaData = JSON.parse(value)
-    var height= "175"
-    if(mediaData.size =="Medium"){
-      height= "350"
+    try{
+      var mediaData = JSON.parse(value)
+    } catch(e) {
+      console.log(e)
     }
-    if(mediaData.size =="Large"){
-      height= "540"
+    if (mediaData){
+      var height= "175"
+      if(mediaData.size =="Medium"){
+        height= "350"
+      }
+      if(mediaData.size =="Large"){
+        height= "540"
+      }
+      
+      return cb([{cls: clss.join(" "), extraOpenTags: "<span style='height:"+height+"px' class='embedMedia'><span class='media'>" + exports.cleanEmbedCode(unescape(mediaData.url),mediaData) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
     }
     
-    return cb([{cls: clss.join(" "), extraOpenTags: "<span style='height:"+height+"px' class='embedMedia'><span class='media'>" + exports.cleanEmbedCode(unescape(mediaData.url),mediaData) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
   }
   //--------------------- insertEmbedPicture
   if (args.cls.indexOf('insertEmbedPicture:') >= 0) {
@@ -59,8 +66,13 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
         }
       }
       console.log(value)
-      var mediaData = JSON.parse(value)
-      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-size='"+mediaData.size+"' data-align='"+mediaData.align+"' data-url='"+unescape(mediaData.url)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan ep_insert_media_"+mediaData.size+" ep_insert_media_"+mediaData.align+"'><span class='image'>" + exports.cleanEmbedPictureCode(unescape(mediaData.url)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+      try{
+        var mediaData = JSON.parse(value)
+      } catch(e) {
+        console.log(e)
+      }
+      if(mediaData)
+        return cb([{cls: clss.join(" "), extraOpenTags: "<span data-size='"+mediaData.size+"' data-align='"+mediaData.align+"' data-url='"+unescape(mediaData.url)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan ep_insert_media_"+mediaData.size+" ep_insert_media_"+mediaData.align+"'><span class='image'>" + exports.cleanEmbedPictureCode(unescape(mediaData.url)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
 
   }
 
@@ -80,10 +92,13 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
         clss.push(cls);
       }
     }
-    var mediaData = JSON.parse(value)
-
-    value = value.substr(value.indexOf(":")+1);
-    return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(mediaData.url)+"' id='emb_video-"+randomString(16)+"' class='embedRemoteVideoSpan'><span class='video'>" + exports.cleanEmbedVideoCode(unescape(mediaData.url)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+    try{
+      var mediaData = JSON.parse(value)
+    } catch(e) {
+      console.log(e)
+    }
+    if(mediaData)
+      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(mediaData.url)+"' id='emb_video-"+randomString(16)+"' class='embedRemoteVideoSpan'><span class='video'>" + exports.cleanEmbedVideoCode(unescape(mediaData.url)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
 
   }
 
@@ -105,10 +120,16 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
         clss.push(cls);
       }
     }
-    var mediaData = JSON.parse(value)
+    try{
+      var mediaData = JSON.parse(value)
+    } catch(e) {
+      console.log(e)
+    }
 
-    value = value.substr(value.indexOf(":")+1);
-    return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(mediaData.url)+"' id='emb_audio-"+randomString(16)+"' class='embedRemoteAudioSpan'><span class='audio'>" + exports.cleanEmbedAudioCode(unescape(mediaData.url)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+    if (mediaData){
+      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(mediaData.url)+"' id='emb_audio-"+randomString(16)+"' class='embedRemoteAudioSpan'><span class='audio'>" + exports.cleanEmbedAudioCode(unescape(mediaData.url)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+
+    }
 
   }
 
