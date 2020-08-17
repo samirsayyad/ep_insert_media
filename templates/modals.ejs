@@ -5,25 +5,47 @@
         <p>Picture, audio, video or stream</p>
         <!-- <input type="text"  placeholder="Youtube url" id="embedMediaSrc" /> -->
         <form method="post" action="" enctype="multipart/form-data" id="myform">
- 
-            <input type="file" id="file" name="file" /> 
-            <input type="text"  placeholder="Youtube/Image url" id="embedMediaSrc" />
-
-            <div id="mediaSizeSelect">
-                <select name="size" >
-                    <option selected="selected" value="Small">Small</option>
-                    <option selected="selected" value="Medium">Medium</option>
-                    <option value="Large">Large</option>
-                </select>
-                <input type="hidden" id="selectedSize" value="Small">
+            <div class="inlineBoxes">
+                <label class="ep_insert_media_label" for="ep_insert_media_file">Upload File</label>
+                <input type="file" id="ep_insert_media_file" name="file" /> 
+                <span class="dividerForBoxes">OR</span>
+                <div class="embedMediaSrc">
+                    <span class="embedMediaSrc innerLable">Url</span>
+                    <input type="text" class="embedMediaSrc embedMediaSrcButton" placeholder="" id="embedMediaSrc">
+                    </input>
+                </div>
+                
+    
             </div>
+ 
+            <div id="mediaSizeSelect">
+                <div class="btnMediaSize on">Small</div>
+                <div class="btnMediaSize">Medium</div>
+                <div class="btnMediaSize">Large</div>
+                <input type="hidden" id="selectedSize" value="Small">
+                <span class="dividerForOptions"></span>
+                <div class="btnAlignDirection" data-value="Right">
+                    <img src="../static/plugins/ep_insert_media/static/img/rightAlign.png"/>
+
+                </div>
+
+                <div class="btnAlignDirection" data-value="Center">
+                    <img src="../static/plugins/ep_insert_media/static/img/centerAlign.png"/>
+                </div>
+         
+                <div class="btnAlignDirection on" data-value="Left">
+                    <img src="../static/plugins/ep_insert_media/static/img/leftAlign.png"/>
+                </div>
+                <input type="hidden" id="selectedAlign" value="Left">
+            </div>
+    
     
         </form>
 
         <div>
             <!-- <input type="button" class="button" value="Upload" id="but_upload"> -->
-            <input type="button" class="embedMediaButton" id="doEmbedMedia" value="Insert media">
-            <input type="button" class="embedMediaButton" id="cancelEmbedMedia" value="Cancel">
+            <input type="button" class="embedMediaButton btn btn-primary" id="doEmbedMedia" value="Insert">
+            <input type="button" class="embedMediaButton btn btn-default" id="cancelEmbedMedia" value="Cancel">
         </div>
     </div>
  

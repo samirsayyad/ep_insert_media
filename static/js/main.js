@@ -1,20 +1,18 @@
 $(document).ready(function () {
   var first =true;
-  $("#mediaSizeSelect option").unwrap().each(function() {
-    var btn = $('<div class="btnMediaSize">'+$(this).text()+'</div>');
-    if(first){
-      btn.addClass('on');
-      first=false;
-    } 
-    $(this).replaceWith(btn);
-});
-
+ 
   $(document).on('click', '.btnMediaSize', function() {
       $('.btnMediaSize').removeClass('on');
       $(this).addClass('on');
       $("#selectedSize").val($(this).text())
   });
 
+  $(document).on('click', '.btnAlignDirection', function() {
+    $('.btnAlignDirection').removeClass('on');
+    $(this).addClass('on');
+    $("#selectedAlign").val($(this).data("value"))
+  });
+  
 
   $("#file").change(function(){
     $("#embedMediaSrc").val("")
