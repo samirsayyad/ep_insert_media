@@ -23,12 +23,14 @@
 }
 .ep_insert_media_label {
   border: 1px solid #ccc;
-  padding: 11px 7px 0px 6px;
+  padding: 11px 7px 0 6px;
   cursor: pointer;
   height: 46px;
   width: 30%;
+  background: #5d7af3;
+  color: white;
 }
-#ep_insert_media_file{
+.ep_insert_media_file{
   opacity: 0;
   /* position: absolute; */
   z-index: -1;
