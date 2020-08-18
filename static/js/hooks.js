@@ -98,7 +98,7 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
       console.log(e)
     }
     if(mediaData)
-      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(mediaData.url)+"' id='emb_video-"+randomString(16)+"' class='embedRemoteVideoSpan'><span class='video'>" + exports.cleanEmbedVideoCode(unescape(mediaData.url)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(mediaData.url)+"' id='emb_video-"+randomString(16)+"' class='embedRemoteVideoSpan'><span class='video'>" + exports.cleanEmbedVideoCode(unescape(mediaData.url),mediaData) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
 
   }
 
@@ -127,7 +127,7 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
     }
 
     if (mediaData){
-      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(mediaData.url)+"' id='emb_audio-"+randomString(16)+"' class='embedRemoteAudioSpan'><span class='audio'>" + exports.cleanEmbedAudioCode(unescape(mediaData.url)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(mediaData.url)+"' id='emb_audio-"+randomString(16)+"' class='embedRemoteAudioSpan'><span class='audio'>" + exports.cleanEmbedAudioCode(unescape(mediaData.url),mediaData) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
 
     }
 
@@ -176,13 +176,13 @@ exports.sanitize = function (inputHtml) {
   });
 }
 
-exports.cleanEmbedAudioCode =  function(orig) {
+exports.cleanEmbedAudioCode =  function(orig,mediaData) {
   var value = $.trim(orig);
-  return '<audio class="audioClass" controls><source src="'+value+'" type="audio/mpeg"></video>';
+  return '<audio class="audioClass ep_insert_media_'+mediaData.size+' ep_insert_media_'+mediaData.align+'" controls><source src="'+value+'" type="audio/mpeg"></video>';
 }
-exports.cleanEmbedVideoCode =  function(orig) {
+exports.cleanEmbedVideoCode =  function(orig,mediaData) {
   var value = $.trim(orig);
-  return '<video class="videoClass" controls><source src="'+value+'" type="video/mp4"></video>';
+  return '<video class="videoClass ep_insert_media_'+mediaData.size+' ep_insert_media_'+mediaData.align+'" controls><source src="'+value+'" type="video/mp4"></video>';
 }
 exports.cleanEmbedPictureCode = function(orig) {
   var value = $.trim(orig);

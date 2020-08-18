@@ -52,7 +52,6 @@
 .embedRemoteVideoSpan{
   display: inline-block;
   line-height: 0;
-  width:50%;
   cursor: pointer;
 }
 .embedRemoteVideoSpan .character {

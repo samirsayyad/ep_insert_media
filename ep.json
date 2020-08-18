@@ -2,6 +2,8 @@
   "parts": [
     {
       "name": "insert_media",
+      "pre": ["ep_etherpad-lite/webaccess", "ep_page_view/page_view"],
+      "post": ["ep_etherpad-lite/static"],
       "hooks": {
         "eejsBlock_editbarMenuLeft": "ep_insert_media/hooks:eejsBlock_editbarMenuLeft",
         "eejsBlock_scripts": "ep_insert_media/hooks:eejsBlock_scripts",
