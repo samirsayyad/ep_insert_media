@@ -54,7 +54,6 @@ exports.expressConfigure = async function (hookName, context) {
         });
     }catch(error){
         console.log("error",error)
-        res.end(null, 'binary');
     }
     
   })
@@ -79,7 +78,6 @@ exports.expressConfigure = async function (hookName, context) {
         });
     }catch(error){
         console.log("error",error)
-        res.end(null, 'binary');
     }
 
   })
@@ -108,7 +106,6 @@ exports.expressConfigure = async function (hookName, context) {
         });
     }catch(error){
         console.log("error",error)
-        res.end(null, 'binary');
     }
 
   })
