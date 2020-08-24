@@ -159,14 +159,12 @@ $(document).ready(function () {
                 $("#embedMediaModal").removeClass("insertEmbedMedia-show");
                 $("#file").val("")
             }else{
-              if (!$("#editorcontainerbox").hasClass("flex-layout")) {
                 $.gritter.add({
                   'title': 'Error',
-                  'text': 'ep_insert_media: '+response.error,
+                  'text': 'ep_insert_media: '+response.error.message,
                   'sticky': true,
                   'class_name': 'error'
                 });
-              }
             }
         },
     });
