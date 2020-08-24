@@ -160,7 +160,9 @@ exports.expressConfigure = async function (hookName, context) {
             req.unpipe(busboy);
             drainStream(req);
             busboy.removeAllListeners();
-            return res.status(201).json({"error":error.stack})
+            var msg =error.stack.substring(0, error.stack.indexOf('\n'))
+
+            return res.status(201).json({"error":msg})
 
         };
 
@@ -211,12 +213,16 @@ exports.expressConfigure = async function (hookName, context) {
                         if (data){
                             return res.status(201).json({"type":settings.ep_insert_media.storage.type,"error":false,fileName :savedFilename ,fileType:fileType,data:data})
                         }else{
-                            return res.status(201).json({"error": err.stack})
+                            var msg =err.stack.substring(0, err.stack.indexOf('\n'))
+
+                            return res.status(201).json({"error": msg})
                         }
                         
                     });
                 }catch(error){
-                    return res.status(201).json({"error":error.message})
+                    var msg = error.message.substring(0, error.message.indexOf('\n'))
+
+                    return res.status(201).json({"error":msg})
 
                 }
 
@@ -244,7 +250,8 @@ exports.expressConfigure = async function (hookName, context) {
                 });
                 }catch(error){
                     console.log(error)
-                    return res.status(201).json({"error":error.message})
+                    var msg = error.message.substring(0, error.message.indexOf('\n'))
+                    return res.status(201).json({"error":msg})
 
                 }
             

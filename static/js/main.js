@@ -161,7 +161,7 @@ $(document).ready(function () {
             }else{
                 $.gritter.add({
                   'title': 'Error',
-                  'text': 'ep_insert_media: '+response.error.message,
+                  'text': 'ep_insert_media: '+response.error,
                   'sticky': true,
                   'class_name': 'error'
                 });
