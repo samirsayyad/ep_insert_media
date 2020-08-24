@@ -1,3 +1,5 @@
+var $ = require('ep_etherpad-lite/static/js/rjquery').$;
+
 $(document).ready(function () {
   var first =true;
  
@@ -67,7 +69,14 @@ $(document).ready(function () {
           }  
           };
           img.onerror = function(){
-              alert("Error on loading image...");   
+              if (!$("#editorcontainerbox").hasClass("flex-layout")) {
+                $.gritter.add({
+                  'title': 'Error',
+                  'text': 'ep_insert_media: image is not supported.',
+                  'sticky': true,
+                  'class_name': 'error'
+                });
+              }
           }
         
          img.src = url;
@@ -150,7 +159,14 @@ $(document).ready(function () {
                 $("#embedMediaModal").removeClass("insertEmbedMedia-show");
                 $("#file").val("")
             }else{
-                alert('file not uploaded because '+response.error);
+              if (!$("#editorcontainerbox").hasClass("flex-layout")) {
+                $.gritter.add({
+                  'title': 'Error',
+                  'text': 'ep_insert_media: '+response.error,
+                  'sticky': true,
+                  'class_name': 'error'
+                });
+              }
             }
         },
     });

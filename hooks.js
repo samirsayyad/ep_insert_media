@@ -38,19 +38,25 @@ exports.expressConfigure = async function (hookName, context) {
         s3ForcePathStyle: true, // needed with minio?
         signatureVersion: 'v4'
     });
-    var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
-    s3.getObject(params, function(err, data) {
-        console.log("data going to be ", params ,data , err)
-        if (data ){
-            res.writeHead(200, {'Content-Type': 'image/jpeg'});
-            res.write(data.Body, 'binary');
-            res.end(null, 'binary');
-        }else{
-            res.end(null, 'binary');
-
-        }
-        
-    });
+    try{
+        var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
+        s3.getObject(params, function(err, data) {
+            console.log("data going to be ", params ,data , err)
+            if (data ){
+                res.writeHead(200, {'Content-Type': 'image/jpeg'});
+                res.write(data.Body, 'binary');
+                res.end(null, 'binary');
+            }else{
+                res.end(null, 'binary');
+    
+            }
+            
+        });
+    }catch(error){
+        console.log("error",error)
+        res.end(null, 'binary');
+    }
+    
   })
   context.app.get('/p/getVideo/:padId/:mediaId', function (req, res, next) {
     var s3  = new AWS.S3({
@@ -60,16 +66,22 @@ exports.expressConfigure = async function (hookName, context) {
         s3ForcePathStyle: true, // needed with minio?
         signatureVersion: 'v4'
     });
-    var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
-    s3.getObject(params, function(err, data) {
-        if (data){
-            res.writeHead(200, {'Content-Type': 'video/mp4'});
-            res.write(data.Body, 'binary');
-            res.end(null, 'binary');
-        }else{
-            res.end(null, 'binary');
-        }
-    });
+    try{
+        var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
+        s3.getObject(params, function(err, data) {
+            if (data){
+                res.writeHead(200, {'Content-Type': 'video/mp4'});
+                res.write(data.Body, 'binary');
+                res.end(null, 'binary');
+            }else{
+                res.end(null, 'binary');
+            }
+        });
+    }catch(error){
+        console.log("error",error)
+        res.end(null, 'binary');
+    }
+
   })
 
  
@@ -83,16 +95,22 @@ exports.expressConfigure = async function (hookName, context) {
         s3ForcePathStyle: true, // needed with minio?
         signatureVersion: 'v4'
     });
-    var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
-    s3.getObject(params, function(err, data) {
-        if (data){
-            res.writeHead(200, {'Content-Type': mime.lookup(req.params.mediaId)});
-            res.write(data.Body, 'binary');
-            res.end(null, 'binary');
-        }else{
-            res.end(null, 'binary');
-        }
-    });
+    try{
+        var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
+        s3.getObject(params, function(err, data) {
+            if (data){
+                res.writeHead(200, {'Content-Type': mime.lookup(req.params.mediaId)});
+                res.write(data.Body, 'binary');
+                res.end(null, 'binary');
+            }else{
+                res.end(null, 'binary');
+            }
+        });
+    }catch(error){
+        console.log("error",error)
+        res.end(null, 'binary');
+    }
+
   })
 
   context.app.post('/p/:padId/pluginfw/ep_insert_media/upload', function (req, res, next) {
@@ -130,7 +148,7 @@ exports.expressConfigure = async function (hookName, context) {
                 }
             });
         } catch (error) {
-            console.error('ep_insert_media ERROR', error);
+            console.log('ep_insert_media ERROR', error);
 
             return next(error);
         }
@@ -186,24 +204,26 @@ exports.expressConfigure = async function (hookName, context) {
                     Key: savedFilename, // File name you want to save as in S3
                     Body: file
                 };
-                s3.upload(params_upload, function(err, data) {
-                    if (err)
-                        console.log(err, err.stack,"error")
-                    else   
-                        console.log(data);
+                try{
+                    s3.upload(params_upload, function(err, data) {
+                        if (err)
+                            console.log(err, err.stack,"error")
+                        else   
+                            console.log(data);
+    
+                        if (data){
+                            return res.status(201).json({"type":settings.ep_insert_media.storage.type,"error":false,fileName :savedFilename ,fileType:fileType,data:data})
+                        }else{
+                            return res.status(201).json({"error": err.stack})
+                        }
+                        
+                    });
+                }catch(error){
+                    return res.status(201).json({"error":error.message})
 
-                    if (data){
-                        return res.status(201).json({"type":settings.ep_insert_media.storage.type,"error":false,fileName :savedFilename ,fileType:fileType,data:data})
-                    }else{
-                        return res.status(201).json({"error":err})
-                    }
-                    
-                });
-
+                }
 
             }else{
-                console.log(imageUpload)
-
                 try {
                     uploadResult = imageUpload.upload(file, {type: mimetype, filename: savedFilename});
                     busboy.on('error', done);
@@ -227,7 +247,7 @@ exports.expressConfigure = async function (hookName, context) {
                 });
                 }catch(error){
                     console.log(error)
-                    return res.status(201).json({"error":"unknown type"})
+                    return res.status(201).json({"error":error.message})
 
                 }
             
