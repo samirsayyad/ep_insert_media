@@ -47,6 +47,8 @@ exports.expressConfigure = async function (hookName, context) {
                 res.write(data.Body, 'binary');
                 res.end(null, 'binary');
             }else{
+                res.write(err, 'binary');
+
                 res.end(null, 'binary');
     
             }
@@ -73,6 +75,8 @@ exports.expressConfigure = async function (hookName, context) {
                 res.write(data.Body, 'binary');
                 res.end(null, 'binary');
             }else{
+                res.write(err, 'binary');
+
                 res.end(null, 'binary');
             }
         });
@@ -101,6 +105,8 @@ exports.expressConfigure = async function (hookName, context) {
                 res.write(data.Body, 'binary');
                 res.end(null, 'binary');
             }else{
+                res.write(err, 'binary');
+
                 res.end(null, 'binary');
             }
         });
@@ -114,7 +120,7 @@ exports.expressConfigure = async function (hookName, context) {
     console.log(settings.ep_insert_media)
     var padId = req.params.padId;
     var storageConfig = settings.ep_insert_media.storage;
-
+    var msgError = null;
     if (settings.ep_insert_media.storage.type =="s3"){
   
         var s3  = new AWS.S3({
@@ -160,9 +166,7 @@ exports.expressConfigure = async function (hookName, context) {
             req.unpipe(busboy);
             drainStream(req);
             busboy.removeAllListeners();
-            var msg =error.stack.substring(0, error.stack.indexOf('\n'))
-
-            return res.status(201).json({"error":msg})
+            msgError =error.stack.substring(0, error.stack.indexOf('\n'))
 
         };
 
@@ -171,7 +175,6 @@ exports.expressConfigure = async function (hookName, context) {
         var accessPath = '';
         busboy.on('file', function (fieldname, file, filename, encoding, mimetype) {
             var fileType = path.extname(filename)
-            var fileTypeWithoutDot = fileType.substr(1);
 
             var savedFilename = path.join(padId, newFileName + fileType);
 
@@ -184,12 +187,8 @@ exports.expressConfigure = async function (hookName, context) {
                 savedFilename = path.join(settings.ep_insert_media.storage.baseFolder, savedFilename);
             }
             file.on('limit', function () {
-                // var error = new Error('File is too large');
-                // error.type = 'fileSize';
-                // error.statusCode = 403;
-                // busboy.emit('error', error);
-                //imageUpload.deletePartials();
-                return res.status(201).json({"error":"File is too large"})
+
+                msgError = "File is too large"
             });
             file.on('error', function (error) {
                 busboy.emit('error', error);
@@ -213,17 +212,15 @@ exports.expressConfigure = async function (hookName, context) {
                         if (data){
                             return res.status(201).json({"type":settings.ep_insert_media.storage.type,"error":false,fileName :savedFilename ,fileType:fileType,data:data})
                         }else{
-                            var msg =err.stack.substring(0, err.stack.indexOf('\n'))
+                            msgError=err.stack.substring(0, err.stack.indexOf('\n'))
 
-                            return res.status(201).json({"error": msg})
+                            
                         }
                         
                     });
                 }catch(error){
-                    var msg = error.message.substring(0, error.message.indexOf('\n'))
-
-                    return res.status(201).json({"error":msg})
-
+                    msgError = error.message.substring(0, error.message.indexOf('\n'))
+                    
                 }
 
             }else{
@@ -243,15 +240,15 @@ exports.expressConfigure = async function (hookName, context) {
                                 return res.status(201).json({"type":settings.ep_insert_media.storage.type,"error":false,fileName : data, fileType:fileType});
                             })
                             .catch(function (err) {
-                                return res.status(201).json({"error":err.stack});
+                                msgError = err.stack ;
                             });
                     }
         
                 });
                 }catch(error){
                     console.log(error)
-                    var msg = error.message.substring(0, error.message.indexOf('\n'))
-                    return res.status(201).json({"error":msg})
+                    msgError = error.message.substring(0, error.message.indexOf('\n'))
+                    
 
                 }
             
@@ -261,7 +258,9 @@ exports.expressConfigure = async function (hookName, context) {
 
         });
 
-       
+        if (msgError !=null)
+            return res.status(201).json({"error":msgError});
+
         req.pipe(busboy);
     }
 
