@@ -1,6 +1,7 @@
 var $ = require('ep_etherpad-lite/static/js/rjquery').$;
 
 $(document).ready(function () {
+
   var first =true;
  
   $(document).on('click', '.btnMediaSize', function() {
@@ -19,6 +20,7 @@ $(document).ready(function () {
   $("#file").change(function(){
     $("#embedMediaSrc").val("")
   })
+
 
   $("#insertEmbedMedia").click(function () {
     // Can not use this yet, fix in main etherpad
@@ -95,6 +97,7 @@ $(document).ready(function () {
     //$("#embedMediaModal").slideUp("fast");
     $("#embedMediaModal").removeClass("insertEmbedMedia-show");
   });
+
 
 
 })

@@ -1,5 +1,35 @@
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
+const copyPasteEvents = require('./copyPasteEvents');
 
+
+exports.postAceInit = function(hookName, context, cb) {
+  var ace =context.ace
+
+
+  //var copyPasteEvents = require("./copyPasteEvents")
+  var browser = require('ep_etherpad-lite/static/js/browser');
+
+  var padOuter = $('iframe[name="ace_outer"]').contents();
+  var padInner = padOuter.find('iframe[name="ace_inner"]');
+  console.log("sss",padInner)
+  if (browser.chrome || browser.firefox) {
+    padInner.contents().on('copy', (e) => {
+      console.log(e)
+      copyPasteEvents.addTextOnClipboard(
+          e, ace, padInner, false, null, null);
+    });
+
+    padInner.contents().on('cut', (e) => {
+      copyPasteEvents.addTextOnClipboard(e, ace, padInner, true);
+    });
+
+    padInner.contents().on('paste', (e) => {
+      copyPasteEvents.pasteMedia(e,ace,padInner);
+    });
+  }
+
+
+}
 exports.aceInitInnerdocbodyHead = function(hook_name, args, cb) {
   args.iframeHTML.push('<link rel="stylesheet" type="text/css" href="/static/plugins/ep_insert_media/static/css/ace.css"/>');
   return cb();
@@ -7,14 +37,13 @@ exports.aceInitInnerdocbodyHead = function(hook_name, args, cb) {
 
 exports.aceAttribsToClasses = function(hook_name, args, cb) {
   console.log("aceAttribsToClasses",args)
-  if (args.key == 'embedMedia' && args.value != "")
-    return cb(["embedMedia:" + args.value]);
-  if (args.key == 'insertEmbedPicture' && args.value != "")
-  return cb(["insertEmbedPicture:" + args.value]);
-  if (args.key == 'insertEmbedVideo' && args.value != "")
-  return cb(["insertEmbedVideo:" + args.value]);
-  if (args.key == 'insertEmbedAudio' && args.value != "")
-  return cb(["insertEmbedAudio:" + args.value]);
+
+  // copy process should add new type if added
+  if (args.key == 'embedMedia' && args.value != "")         return cb(["embedMedia:" + args.value]);
+  if (args.key == 'insertEmbedPicture' && args.value != "") return cb(["insertEmbedPicture:" + args.value]);
+  if (args.key == 'insertEmbedVideo' && args.value != "")   return cb(["insertEmbedVideo:" + args.value]);
+  if (args.key == 'insertEmbedAudio' && args.value != "")   return cb(["insertEmbedAudio:" + args.value]);
+  
   // if (args.key == 'insertEmbedPicture' && args.value == "embedRemoteImageSpanLarge")
   // return cb(["insertEmbedPictureBig:" + args.value]);
 };
@@ -226,9 +255,14 @@ exports.cleanEmbedCode = function (orig,mediaData) {
 
 
 exports.aceInitialized = function(hook, context){
+
+  const editorInfo = context.editorInfo;
+  const hasMediaOnSelection = copyPasteEvents.hasMediaOnSelection;
+
   var padOuter = $('iframe[name="ace_outer"]').contents();
   var padInner = padOuter.find('iframe[name="ace_inner"]');
   var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
+  editorInfo.ace_hasMediaOnSelection = _(hasMediaOnSelection).bind(context);
 
   // padInner.contents().on("click", ".embedRemoteImageSpanLarge", function(e){
   //   var url = $(this).data("url")

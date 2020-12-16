@@ -16,7 +16,8 @@
         "aceInitInnerdocbodyHead": "ep_insert_media/static/js/hooks:aceInitInnerdocbodyHead",
         "aceAttribsToClasses": "ep_insert_media/static/js/hooks:aceAttribsToClasses",
         "aceCreateDomLine": "ep_insert_media/static/js/hooks:aceCreateDomLine",
-        "aceInitialized" : "ep_insert_media/static/js/hooks:aceInitialized"
+        "aceInitialized" : "ep_insert_media/static/js/hooks:aceInitialized",
+        "postAceInit":"ep_insert_media/static/js/hooks:postAceInit"
       }
     }
   ]
