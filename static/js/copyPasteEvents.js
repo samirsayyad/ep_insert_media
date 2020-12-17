@@ -1,29 +1,47 @@
+'use strict';
+
 const _ = require('ep_etherpad-lite/static/js/underscore');
+var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 
 exports.pasteMedia = (e,ace,padInner) => {
 //  var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
-  var objectMediaData = e.originalEvent.clipboardData.getData('text/objectMediaData');
+  var objectMediaData = e.originalEvent.clipboardData.getData('text/ep_insert_media');
   console.log("come for paste",objectMediaData)
 
   if(objectMediaData){
 
-      setTimeout(function() {
-          objectMediaData = JSON.parse(objectMediaData)
-          //  var objectMediaDataValue = JSON.parse(objectMediaData.value)
-          console.log("objectMediaData",objectMediaData,"objectMediaDataValue",objectMediaData.value)
-          //$("#khiar").focus().Text("khiar")
-          console.log(padInner.find('#khiar'));
-          ace.callWithAce(function (ace) {
-            var rep = ace.ace_getRep();
-            console.log(e)
-            // ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
-            // ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-            // ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture" ,objectMediaData.insertEmbedPicture]]);
-//            ace.ace_focus();
+    let rawHtml = JSON.parse(objectMediaData);
+    rawHtml = $('<div></div>').append(rawHtml.raw);
+    console.log('first media', rawHtml.find('.embedRemoteImageSpan'));
 
-          }, "insertEmbedPicture");
+    rawHtml.find('.embedRemoteImageSpan').each(function () {
+      $(this).attr({id: `emb_img-${randomString(16)}`});
+    });
 
-      }, 200);
+    const selection = padInner.contents()[0].getSelection();
+    if (!selection.rangeCount) return false;
+
+    console.log("before injecting",rawHtml)
+    selection.getRangeAt(0).insertNode(rawHtml[0]);
+    e.preventDefault();
+
+//       setTimeout(function() {
+//           //objectMediaData = JSON.parse(objectMediaData)
+//           //  var objectMediaDataValue = JSON.parse(objectMediaData.value)
+//           console.log("objectMediaData",objectMediaData,"objectMediaDataValue",objectMediaData.value)
+//           //$("#khiar").focus().Text("khiar")
+//           console.log(padInner.find('#khiar'));
+//           ace.callWithAce(function (ace) {
+//             var rep = ace.ace_getRep();
+//             console.log(e)
+//             // ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
+//             // ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
+//             // ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture" ,objectMediaData.insertEmbedPicture]]);
+// //            ace.ace_focus();
+
+//           }, "insertEmbedPicture");
+
+//       }, 200);
   }
 
 
@@ -47,7 +65,7 @@ exports.addTextOnClipboard = (e, ace, padInner) => {
 
     }
 
-    html = removeMediaAndReplaceWithChar("E", html);
+    //html = removeMediaAndReplaceWithChar("E", html);
 
 
     //embedRemoteImageSpan
@@ -55,7 +73,7 @@ exports.addTextOnClipboard = (e, ace, padInner) => {
     console.log("commentIdOnFirstPositionSelected",html)
 
     console.log("this going put in media object",hasMediaOnSelection)
-    e.originalEvent.clipboardData.setData('text/html',getHtml(html));
+    e.originalEvent.clipboardData.setData('text/ep_insert_media',JSON.stringify({raw: getHtml(html)}));
     e.originalEvent.clipboardData.setData('text/objectMediaData', JSON.stringify(hasMediaOnSelection) );
 
     e.preventDefault();
@@ -63,6 +81,24 @@ exports.addTextOnClipboard = (e, ace, padInner) => {
 
 
 }
+
+exports.hasMediaOnSelection = function(){
+  let hasMedia;
+  const attributeManager = this.documentAttributeManager;
+  const rep = this.rep;
+  const selFirstLine = rep.selStart[0];
+  const firstColumn = rep.selStart[1];
+  const lastColumn = rep.selEnd[1];
+  const selLastLine = rep.selEnd[0];
+  const selectionOfMultipleLine = hasMultipleLineSelected(selFirstLine, selLastLine);
+  console.log("selectionOfMultipleLine,",selectionOfMultipleLine)
+  if (selectionOfMultipleLine) {
+    hasMedia = hasMediaOnMultipleLineSel(selFirstLine, selLastLine, rep, attributeManager);
+  } else {
+    hasMedia = hasMediaOnLine(selFirstLine, firstColumn, lastColumn, attributeManager);
+  }
+  return hasMedia;
+};
 
 const removeMediaAndReplaceWithChar = (selectedChar,html)=>{
   _.each(html, (element)=>{
@@ -109,23 +145,6 @@ const getMediaIds = (html) => {
   return uniqueCommentIds;
 };
 
-exports.hasMediaOnSelection = function () {
-  let hasMedia;
-  const attributeManager = this.documentAttributeManager;
-  const rep = this.rep;
-  const selFirstLine = rep.selStart[0];
-  const firstColumn = rep.selStart[1];
-  const lastColumn = rep.selEnd[1];
-  const selLastLine = rep.selEnd[0];
-  const selectionOfMultipleLine = hasMultipleLineSelected(selFirstLine, selLastLine);
-  console.log("selectionOfMultipleLine,",selectionOfMultipleLine)
-  if (selectionOfMultipleLine) {
-    hasMedia = hasMediaOnMultipleLineSel(selFirstLine, selLastLine, rep, attributeManager);
-  } else {
-    hasMedia = hasMediaOnLine(selFirstLine, firstColumn, lastColumn, attributeManager);
-  }
-  return hasMedia;
-};
 
 const hasMediaOnMultipleLineSel = (selFirstLine, selLastLine, rep, attributeManager) => {
   let foundLineWithMedia = false;

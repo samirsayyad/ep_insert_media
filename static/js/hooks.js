@@ -1,6 +1,7 @@
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
+const _ = require('ep_etherpad-lite/static/js/underscore');
 const copyPasteEvents = require('./copyPasteEvents');
-
+const hasMediaOnSelection =copyPasteEvents.hasMediaOnSelection;
 
 exports.postAceInit = function(hookName, context, cb) {
   var ace =context.ace
@@ -254,15 +255,15 @@ exports.cleanEmbedCode = function (orig,mediaData) {
 }
 
 
-exports.aceInitialized = function(hook, context){
+exports.aceInitialized = (hook, context, cb)=>{
 
   const editorInfo = context.editorInfo;
-  const hasMediaOnSelection = copyPasteEvents.hasMediaOnSelection;
-
-  var padOuter = $('iframe[name="ace_outer"]').contents();
-  var padInner = padOuter.find('iframe[name="ace_inner"]');
-  var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
+  // var padOuter = $('iframe[name="ace_outer"]').contents();
+  // var padInner = padOuter.find('iframe[name="ace_inner"]');
+  // var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
+  
   editorInfo.ace_hasMediaOnSelection = _(hasMediaOnSelection).bind(context);
+  return cb();
 
   // padInner.contents().on("click", ".embedRemoteImageSpanLarge", function(e){
   //   var url = $(this).data("url")
