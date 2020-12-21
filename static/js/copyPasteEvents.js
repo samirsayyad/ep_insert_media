@@ -91,7 +91,7 @@ exports.addTextOnClipboard = (e, ace, padInner) => {
     hasMediaOnSelection = ace.ace_hasMediaOnSelection();
   });
   console.log("hasMediaOnSelection",hasMediaOnSelection)
-  if (hasMediaOnSelection) {
+  if (hasMediaOnSelection.length) {
     const range = padInner.contents()[0].getSelection().getRangeAt(0);
     const rawHtml = createHiddenDiv(range);
     var html = rawHtml;
