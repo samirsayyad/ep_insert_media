@@ -4,44 +4,82 @@ const _ = require('ep_etherpad-lite/static/js/underscore');
 var randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 
 exports.pasteMedia = (e,ace,padInner) => {
-//  var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
-  var objectMediaData = e.originalEvent.clipboardData.getData('text/ep_insert_media');
+  var objectMediaDataHtml = e.originalEvent.clipboardData.getData('text/objectMediaDataHtml');
+  var objectMediaData = e.originalEvent.clipboardData.getData('text/objectMediaData');
+
+  
   console.log("come for paste",objectMediaData)
 
-  if(objectMediaData){
+  if(objectMediaDataHtml && objectMediaData){
 
-    let rawHtml = JSON.parse(objectMediaData);
+    objectMediaData = JSON.parse(objectMediaData)
+    let rawHtml = JSON.parse(objectMediaDataHtml);
     rawHtml = $('<div></div>').append(rawHtml.raw);
     console.log('first media', rawHtml.find('.embedRemoteImageSpan'));
 
+    //insertEmbedPicture
+    var elementCounter = 0
     rawHtml.find('.embedRemoteImageSpan').each(function () {
-      $(this).attr({id: `emb_img-${randomString(16)}`});
+      var id = btoa(objectMediaData['insertEmbedPicture'][elementCounter]) // randomString(16) ;
+      $(this).attr({id: `emb_img-${id}`});
+      $(this).attr({class: `emb_img-${id}`});
+
+     $(this).empty()
+     $(this).text("E")
+     elementCounter++
     });
+
+
+    //embedMedia
+    elementCounter = 0
+    rawHtml.find('.embedMedia').each(function () {
+      var id = btoa(objectMediaData['embedMedia'][elementCounter]) // randomString(16) ;
+      $(this).attr({id: `emb_embedMedia-${id}`});
+      $(this).attr({class: `emb_embedMedia-${id}`});
+
+     $(this).empty()
+     $(this).text("E")
+     elementCounter++
+    });
+    
+
+    //insertEmbedVideo
+    elementCounter = 0
+    rawHtml.find('.embedRemoteVideoSpan').each(function () {
+      var id = btoa(objectMediaData['insertEmbedVideo'][elementCounter]) // randomString(16) ;
+      $(this).attr({id: `emb_video-${id}`});
+      $(this).attr({class: `emb_video-${id}`});
+
+     $(this).empty()
+     $(this).text("E")
+     elementCounter++
+    });
+
+
+
+    //insertEmbedAudio
+    elementCounter = 0
+    rawHtml.find('.embedRemoteAudioSpan').each(function () {
+      var id = btoa(objectMediaData['insertEmbedAudio'][elementCounter]) // randomString(16) ;
+      $(this).attr({id: `emb_audio-${id}`});
+      $(this).attr({class: `emb_audio-${id}`});
+
+     $(this).empty()
+     $(this).text("E")
+     elementCounter++
+    });
+
 
     const selection = padInner.contents()[0].getSelection();
     if (!selection.rangeCount) return false;
 
     console.log("before injecting",rawHtml)
+    
     selection.getRangeAt(0).insertNode(rawHtml[0]);
+
     e.preventDefault();
 
-//       setTimeout(function() {
-//           //objectMediaData = JSON.parse(objectMediaData)
-//           //  var objectMediaDataValue = JSON.parse(objectMediaData.value)
-//           console.log("objectMediaData",objectMediaData,"objectMediaDataValue",objectMediaData.value)
-//           //$("#khiar").focus().Text("khiar")
-//           console.log(padInner.find('#khiar'));
-//           ace.callWithAce(function (ace) {
-//             var rep = ace.ace_getRep();
-//             console.log(e)
-//             // ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
-//             // ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-//             // ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture" ,objectMediaData.insertEmbedPicture]]);
-// //            ace.ace_focus();
 
-//           }, "insertEmbedPicture");
-
-//       }, 200);
   }
 
 
@@ -52,30 +90,19 @@ exports.addTextOnClipboard = (e, ace, padInner) => {
   ace.callWithAce((ace) => {
     hasMediaOnSelection = ace.ace_hasMediaOnSelection();
   });
+  console.log("hasMediaOnSelection",hasMediaOnSelection)
   if (hasMediaOnSelection) {
     const range = padInner.contents()[0].getSelection().getRangeAt(0);
     const rawHtml = createHiddenDiv(range);
     var html = rawHtml;
-
     const onlyTextIsSelected = selectionHasOnlyText(rawHtml);
-
     if (onlyTextIsSelected) {
       const textSelected = rawHtml[0].textContent;
       html = buildHtmlToCopyWhenSelectionHasOnlyText(textSelected, range);
-
     }
-
-    //html = removeMediaAndReplaceWithChar("E", html);
-
-
-    //embedRemoteImageSpan
-
-    console.log("commentIdOnFirstPositionSelected",html)
-
     console.log("this going put in media object",hasMediaOnSelection)
-    e.originalEvent.clipboardData.setData('text/ep_insert_media',JSON.stringify({raw: getHtml(html)}));
+    e.originalEvent.clipboardData.setData('text/objectMediaDataHtml',JSON.stringify({raw: getHtml(html)}));
     e.originalEvent.clipboardData.setData('text/objectMediaData', JSON.stringify(hasMediaOnSelection) );
-
     e.preventDefault();
   }
 
@@ -100,18 +127,6 @@ exports.hasMediaOnSelection = function(){
   return hasMedia;
 };
 
-const removeMediaAndReplaceWithChar = (selectedChar,html)=>{
-  _.each(html, (element)=>{
-    console.log(element)
-    
-  })
-
-  console.log($(html).find(`.embedRemoteImageSpan`),"|$(html).find(`.embedRemoteImageSpan`)")
-  $(html).find(`.embedRemoteImageSpan`).text("ELM") //= "<span id='khiar'>E</span>";
-
-  
-  return html
-}
 
 const selectionHasOnlyText = (rawHtml) => {
   const html = getHtml(rawHtml);
@@ -130,32 +145,20 @@ const htmlDecode = (input) => {
 };
 
 
-const getMediaIds = (html) => {
-  const allDiv = $(html).find('div');
-  const commentIds = [];
-  _.each(allDiv, (span) => {
-    const cls = $(span).attr('class');
-    const classCommentId = /(?:^| )(embedRemoteImageSpan[A-Za-z0-9]*)/.exec(cls);
-    const commentId = (classCommentId) ? classCommentId[1] : false;
-    if (commentId) {
-      commentIds.push(commentId);
-    }
-  });
-  const uniqueCommentIds = _.uniq(commentIds);
-  return uniqueCommentIds;
-};
-
 
 const hasMediaOnMultipleLineSel = (selFirstLine, selLastLine, rep, attributeManager) => {
-  let foundLineWithMedia = false;
+  let foundLineWithMedia = {};
   console.log(selFirstLine, selLastLine,)
-  for (let line = selFirstLine; line <= selLastLine && !foundLineWithMedia; line++) {
+  for (let line = selFirstLine; line <= selLastLine; line++) {
     console.log("we are going to process",line)
     const firstColumn = getFirstColumnOfSelection(line, rep, selFirstLine);
     const lastColumn = getLastColumnOfSelection(line, rep, selLastLine);
     const hasMedia = hasMediaOnLine(line, firstColumn, lastColumn, attributeManager);
+    console.log("hasMedia",hasMedia)
     if (hasMedia) {
-      foundLineWithMedia = hasMedia;
+      if (!foundLineWithMedia[hasMedia.elemenet]) foundLineWithMedia[hasMedia.elemenet] = [];
+
+      foundLineWithMedia[hasMedia.elemenet].push(hasMedia.data);
     }
   }
   return foundLineWithMedia;
@@ -181,16 +184,27 @@ const hasMediaOnLine = (lineNumber, firstColumn, lastColumn, attributeManager) =
   console.log(lineNumber, firstColumn, lastColumn,)
   for (let column = firstColumn; column <= lastColumn && !foundMediaOnLine; column++) {
 
-    // copy process should add new type if added
-    const mediaData_embedMedia          =  _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).embedMedia ;
-    const mediaData_insertEmbedPicture  =  _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).insertEmbedPicture ;
-    const mediaData_insertEmbedVideo    =  _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).insertEmbedVideo ;
-    const mediaData_insertEmbedAudio    =  _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).insertEmbedAudio ;
+    // copy process should add new type if added also for pasted
+    // real elements that comes from upload modal
+    const embedMedia          =  _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).embedMedia ;
+    const insertEmbedPicture  =  _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).insertEmbedPicture ;
+    const insertEmbedVideo    =  _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).insertEmbedVideo ;
+    const insertEmbedAudio    =  _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).insertEmbedAudio ;
 
-    if(mediaData_embedMedia         !== undefined) foundMediaOnLine = _.object(attributeManager.getAttributesOnPosition(lineNumber, column));
-    if(mediaData_insertEmbedPicture !== undefined) foundMediaOnLine = _.object(attributeManager.getAttributesOnPosition(lineNumber, column));
-    if(mediaData_insertEmbedVideo   !== undefined) foundMediaOnLine = _.object(attributeManager.getAttributesOnPosition(lineNumber, column));
-    if(mediaData_insertEmbedAudio   !== undefined) foundMediaOnLine = _.object(attributeManager.getAttributesOnPosition(lineNumber, column));
+    // pasted elements that comes from copy paste flow, because of not lost any media in pad need to done for each pasted to
+    // const embedMedia_paste          =  _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).embedMedia_paste ;
+    // const insertEmbedPicture_paste  =  _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).insertEmbedPicture_paste ;
+    // const insertEmbedVideo_paste    =  _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).insertEmbedVideo_paste ;
+    // const insertEmbedAudio_paste    =  _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).insertEmbedAudio_paste ;
+
+    if(embedMedia         !== undefined) foundMediaOnLine = { "elemenet" : "embedMedia","data" : embedMedia };
+    if(insertEmbedPicture !== undefined) foundMediaOnLine = { "elemenet" : "insertEmbedPicture","data" : insertEmbedPicture};
+    if(insertEmbedVideo   !== undefined) foundMediaOnLine = { "elemenet" : "insertEmbedVideo","data" : insertEmbedVideo};
+    if(insertEmbedAudio   !== undefined) foundMediaOnLine = { "elemenet" : "insertEmbedAudio","data" : insertEmbedAudio};
+    // if(embedMedia_paste         !== undefined) foundMediaOnLine = { "elemenet" : "embedMedia","data" : atob(embedMedia_paste)}; // still atob use for not get error during paste of old media
+    // if(insertEmbedPicture_paste !== undefined) foundMediaOnLine = { "elemenet" : "insertEmbedPicture","data" : atob(insertEmbedPicture_paste)};
+    // if(insertEmbedVideo_paste   !== undefined) foundMediaOnLine = { "elemenet" : "insertEmbedVideo","data" : atob(insertEmbedVideo_paste)};
+    // if(insertEmbedAudio_paste   !== undefined) foundMediaOnLine = { "elemenet" : "insertEmbedAudio","data" : atob(insertEmbedAudio_paste)};
     
   }
   return foundMediaOnLine;
@@ -211,7 +225,7 @@ const getTagsInSelection = (htmlObject) => {
   let tag;
   while ($(htmlObject)[0].localName !== 'div') {
     const html = $(htmlObject).prop('outerHTML');
-    const stylingTagRegex = /<(b|i|u|s)>/.exec(html);
+    const stylingTagRegex = /<(b|i|u|s|div|img)>/.exec(html);
     tag = stylingTagRegex ? stylingTagRegex[1] : '';
     tags.push(tag);
     htmlObject = $(htmlObject).parent();

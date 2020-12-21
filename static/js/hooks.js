@@ -3,6 +3,14 @@ const _ = require('ep_etherpad-lite/static/js/underscore');
 const copyPasteEvents = require('./copyPasteEvents');
 const hasMediaOnSelection =copyPasteEvents.hasMediaOnSelection;
 
+exports.aceSelectionChanged= function aceSelectionChanged(rep, context) {
+  console.log(context.callstack.type)
+  // if (context.callstack.type === 'insertheading') {
+  //   rep = context.rep;
+  //   var headingTagId = ['headingTagId', randomString(16)];
+  //   context.documentAttributeManager.setAttributesOnRange(rep.selStart, rep.selEnd, [headingTagId]);
+  // }
+}
 exports.postAceInit = function(hookName, context, cb) {
   var ace =context.ace
 
@@ -45,6 +53,9 @@ exports.aceAttribsToClasses = function(hook_name, args, cb) {
   if (args.key == 'insertEmbedVideo' && args.value != "")   return cb(["insertEmbedVideo:" + args.value]);
   if (args.key == 'insertEmbedAudio' && args.value != "")   return cb(["insertEmbedAudio:" + args.value]);
   
+
+  //if (args.key == 'insertEmbedPicture_paste' && args.value != "") return cb(["insertEmbedPicture:" + atob(args.value)]);
+
   // if (args.key == 'insertEmbedPicture' && args.value == "embedRemoteImageSpanLarge")
   // return cb(["insertEmbedPictureBig:" + args.value]);
 };
@@ -77,7 +88,7 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
         height= "540"
       }
       
-      return cb([{cls: clss.join(" "), extraOpenTags: "<span style='height:"+height+"px' class='embedMedia'><span class='media'>" + exports.cleanEmbedCode(unescape(mediaData.url),mediaData) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+      return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv style='height:"+height+"px' id='emb_embedMedia-"+randomString(16)+"' class='embedMedia'><samdiv class='media'>" + exports.cleanEmbedCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
     }
     
   }
@@ -95,14 +106,14 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
           clss.push(cls);
         }
       }
-      console.log(value)
       try{
         var mediaData = JSON.parse(value)
+        console.log("after ",mediaData)
       } catch(e) {
         console.log(e)
       }
       if(mediaData)
-        return cb([{cls: clss.join(" "), extraOpenTags: "<span data-size='"+mediaData.size+"' data-align='"+mediaData.align+"' data-url='"+unescape(mediaData.url)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan ep_insert_media_"+mediaData.size+" ep_insert_media_"+mediaData.align+"'><span class='image'>" + exports.cleanEmbedPictureCode(unescape(mediaData.url)) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+        return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv data-size='"+mediaData.size+"' data-align='"+mediaData.align+"' data-url='"+unescape(mediaData.url)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan ep_insert_media_"+mediaData.size+" ep_insert_media_"+mediaData.align+"'><samdiv class='image'>" + exports.cleanEmbedPictureCode(unescape(mediaData.url)) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
 
   }
 
@@ -128,7 +139,7 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
       console.log(e)
     }
     if(mediaData)
-      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(mediaData.url)+"' id='emb_video-"+randomString(16)+"' class='embedRemoteVideoSpan'><span class='video'>" + exports.cleanEmbedVideoCode(unescape(mediaData.url),mediaData) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+      return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv data-url='"+unescape(mediaData.url)+"' id='emb_video-"+randomString(16)+"' class='embedRemoteVideoSpan'><samdiv class='video'>" + exports.cleanEmbedVideoCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
 
   }
 
@@ -157,7 +168,7 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
     }
 
     if (mediaData){
-      return cb([{cls: clss.join(" "), extraOpenTags: "<span data-url='"+unescape(mediaData.url)+"' id='emb_audio-"+randomString(16)+"' class='embedRemoteAudioSpan'><span class='audio'>" + exports.cleanEmbedAudioCode(unescape(mediaData.url),mediaData) + "</span><span class='character'>", extraCloseTags: '</span>'}]);
+      return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv data-url='"+unescape(mediaData.url)+"' id='emb_audio-"+randomString(16)+"' class='embedRemoteAudioSpan'><samdiv class='audio'>" + exports.cleanEmbedAudioCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
 
     }
 
