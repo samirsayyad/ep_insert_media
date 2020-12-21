@@ -161,6 +161,7 @@ const hasMediaOnMultipleLineSel = (selFirstLine, selLastLine, rep, attributeMana
       foundLineWithMedia[hasMedia.elemenet].push(hasMedia.data);
     }
   }
+  if(_.isEmpty(foundLineWithMedia)) foundLineWithMedia=false 
   return foundLineWithMedia;
 };
 const getFirstColumnOfSelection =
