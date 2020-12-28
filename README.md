@@ -3,7 +3,8 @@
 It will upload / add media ( audio / video / stream / youtube / vimeo ) to pad.
 
 ## Demo
-![](https://youtu.be/0zi4EGQdZyE)
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/0zi4EGQdZyE/0.jpg)](https://www.youtube.com/watch?v=0zi4EGQdZyE)
 
 ## Installing
 npm install ep_insert_media
