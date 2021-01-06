@@ -1,8 +1,10 @@
 
 # Insert media plugin
-Explain what your plugin does and who it's useful for.
+It will upload / add media ( audio / video / stream / youtube / vimeo ) to pad.
 
-## Example animated gif of usage if appropriate
+## Demo
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/0zi4EGQdZyE/0.jpg)](https://www.youtube.com/watch?v=0zi4EGQdZyE)
 
 ## Installing
 npm install ep_insert_media
@@ -10,17 +12,21 @@ npm install ep_insert_media
 or Use the Etherpad ``/admin`` interface.
 
 ## Settings
-Document settings if any
-
-## Testing
-Document how to run backend / frontend tests.
-
-### Frontend
-Visit http://whatever/tests/frontend/ to run the frontend tests.
-
-### backend
-
-Type ``cd src && npm run test`` to run the backend tests.
+    "ep_insert_media":{
+      "storage":{
+        "endPoint" : "${BUCKET_S3_SERVER:null}",// need for s3 upload
+        "useSSL" : true ,// need for s3 upload
+        "type": "s3", // put whatever except s3 for upload local
+        "accessKeyId": "${ACCESS_KEY_ID:null}",// need for s3 upload
+        "secretAccessKey": "${ACCESS_KEY_SECRET:null}",// need for s3 upload
+        "region": "UK",// need for s3 upload
+        "bucket": "${MEDIA_BUCKET_NAME}", // need for s3 upload
+        "baseFolder": "${FOLDER_PATH:./}" // need just for local uploading
+      },
+      "fileTypes": ["jpeg", "jpg", "bmp", "gif","png","webm","mp4","m4v","mp3",
+        "ogg", "m4a","flac","wav","wma", "aac"  ],
+      "maxFileSize": 50000000
+    },
 
 ## LICENSE
 Apache 2.0
