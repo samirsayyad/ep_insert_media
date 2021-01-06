@@ -2,7 +2,10 @@
   "name": "ep_insert_media",
   "description": "Embed media (youtube, vimeo etc)",
   "version": "0.0.1",
-  "author": "Samir Sayyad",
+  "author": {
+		"name": "Samir Sayyad",
+		"email": "samir.saiad@gmail.com"
+	},
   "contributors": [],
   "dependencies": {
     "busboy": "^0.3.1",
