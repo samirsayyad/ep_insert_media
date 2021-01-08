@@ -88,7 +88,9 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
         height= "540"
       }
       
-      return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv style='height:"+height+"px' id='emb_embedMedia-"+randomString(16)+"' class='embedMedia'><samdiv class='media'>" + exports.cleanEmbedCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
+      return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv style='height:"+
+      height+"px' id='emb_embedMedia-"+randomString(16)+"' class='embedMedia'><samdiv class='media'>" + 
+      exports.cleanEmbedCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
     }
     
   }
@@ -113,7 +115,10 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
         console.log(e)
       }
       if(mediaData)
-        return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv data-size='"+mediaData.size+"' data-align='"+mediaData.align+"' data-url='"+unescape(mediaData.url)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan ep_insert_media_"+mediaData.size+" ep_insert_media_"+mediaData.align+"'><samdiv class='image'>" + exports.cleanEmbedPictureCode(unescape(mediaData.url)) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
+        return cb([{cls: clss.join(" "), 
+        extraOpenTags: "<samdiv data-size='"+mediaData.size+"' data-align='"+mediaData.align+
+        "' data-url='"+unescape(mediaData.url)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan'><samdiv class='image'>" + exports.cleanEmbedPictureCode(unescape(mediaData.url),mediaData.align,mediaData.size) +
+         "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
 
   }
 
@@ -221,13 +226,13 @@ exports.cleanEmbedAudioCode =  function(orig,mediaData) {
   var value = $.trim(orig);
   return '<audio class="audioClass ep_insert_media_'+mediaData.size+' ep_insert_media_'+mediaData.align+'" controls><source src="'+value+'" type="audio/mpeg"></video>';
 }
-exports.cleanEmbedVideoCode =  function(orig,mediaData) {
+exports.cleanEmbedVideoCode =  function(orig,mediaData,align,size) {
   var value = $.trim(orig);
   return '<video class="videoClass ep_insert_media_'+mediaData.size+' ep_insert_media_'+mediaData.align+'" controls><source src="'+value+'" type="video/mp4"></video>';
 }
-exports.cleanEmbedPictureCode = function(orig) {
+exports.cleanEmbedPictureCode = function(orig,align,size) {
   var value = $.trim(orig);
-  return "<img class='embedRemoteImage' src='"+value+"'>";
+  return "<img class='embedRemoteImage ep_insert_media_"+align+" ep_insert_media_"+size+"' src='"+value+"'>";
 }
 
 
