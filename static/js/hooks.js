@@ -4,12 +4,13 @@ const copyPasteEvents = require('./copyPasteEvents');
 const hasMediaOnSelection =copyPasteEvents.hasMediaOnSelection;
 
 exports.aceSelectionChanged= function aceSelectionChanged(rep, context) {
-  console.log(context.callstack.type)
+  //console.log(context.callstack.type)
   // if (context.callstack.type === 'insertheading') {
   //   rep = context.rep;
   //   var headingTagId = ['headingTagId', randomString(16)];
   //   context.documentAttributeManager.setAttributesOnRange(rep.selStart, rep.selEnd, [headingTagId]);
   // }
+  return []
 }
 exports.postAceInit = function(hookName, context, cb) {
   var ace =context.ace
@@ -39,12 +40,12 @@ exports.postAceInit = function(hookName, context, cb) {
 
 
 }
-exports.aceInitInnerdocbodyHead = function(hook_name, args, cb) {
+exports.aceInitInnerdocbodyHead = (hook_name, args, cb) =>{
   args.iframeHTML.push('<link rel="stylesheet" type="text/css" href="/static/plugins/ep_insert_media/static/css/ace.css"/>');
-  return cb();
+  return [];
 };
 
-exports.aceAttribsToClasses = function(hook_name, args, cb) {
+exports.aceAttribsToClasses = (hook_name, args, cb) =>{
   console.log("aceAttribsToClasses",args)
 
   // copy process should add new type if added
@@ -60,7 +61,7 @@ exports.aceAttribsToClasses = function(hook_name, args, cb) {
   // return cb(["insertEmbedPictureBig:" + args.value]);
 };
 
-exports.aceCreateDomLine = function(hook_name, args, cb) {
+exports.aceCreateDomLine = (hook_name, args, cb) =>{
   if (args.cls.indexOf('embedMedia:') >= 0) {
     var clss = [];
     var argClss = args.cls.split(" ");
