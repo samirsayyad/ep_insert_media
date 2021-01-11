@@ -48,12 +48,12 @@ exports.aceAttribsToClasses = function(hook_name, args, cb) {
   console.log("aceAttribsToClasses",args)
 
   // copy process should add new type if added
-  if (args.key == 'embedMedia' && args.value != "")         return cb(["embedMedia:" + args.value]);
-  if (args.key == 'insertEmbedPicture' && args.value != "") return cb(["insertEmbedPicture:" + args.value]);
-  if (args.key == 'insertEmbedVideo' && args.value != "")   return cb(["insertEmbedVideo:" + args.value]);
-  if (args.key == 'insertEmbedAudio' && args.value != "")   return cb(["insertEmbedAudio:" + args.value]);
+  if (args.key == 'embedMedia' && args.value != "")         return ["embedMedia:" + args.value];
+  if (args.key == 'insertEmbedPicture' && args.value != "") return ["insertEmbedPicture:" + args.value];
+  if (args.key == 'insertEmbedVideo' && args.value != "")   return ["insertEmbedVideo:" + args.value];
+  if (args.key == 'insertEmbedAudio' && args.value != "")   return ["insertEmbedAudio:" + args.value];
   
-
+  return []
   //if (args.key == 'insertEmbedPicture_paste' && args.value != "") return cb(["insertEmbedPicture:" + atob(args.value)]);
 
   // if (args.key == 'insertEmbedPicture' && args.value == "embedRemoteImageSpanLarge")
@@ -88,9 +88,9 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
         height= "540"
       }
       
-      return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv style='height:"+
+      return [{cls: clss.join(" "), extraOpenTags: "<samdiv style='height:"+
       height+"px' id='emb_embedMedia-"+randomString(16)+"' class='embedMedia'><samdiv class='media'>" + 
-      exports.cleanEmbedCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
+      exports.cleanEmbedCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}];
     }
     
   }
@@ -115,10 +115,10 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
         console.log(e)
       }
       if(mediaData)
-        return cb([{cls: clss.join(" "), 
+        return [{cls: clss.join(" "), 
         extraOpenTags: "<samdiv data-size='"+mediaData.size+"' data-align='"+mediaData.align+
         "' data-url='"+unescape(mediaData.url)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan'><samdiv class='image'>" + exports.cleanEmbedPictureCode(unescape(mediaData.url),mediaData.align,mediaData.size) +
-         "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
+         "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}];
 
   }
 
@@ -144,7 +144,7 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
       console.log(e)
     }
     if(mediaData)
-      return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv data-url='"+unescape(mediaData.url)+"' id='emb_video-"+randomString(16)+"' class='embedRemoteVideoSpan'><samdiv class='video'>" + exports.cleanEmbedVideoCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
+      return [{cls: clss.join(" "), extraOpenTags: "<samdiv data-url='"+unescape(mediaData.url)+"' id='emb_video-"+randomString(16)+"' class='embedRemoteVideoSpan'><samdiv class='video'>" + exports.cleanEmbedVideoCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}];
 
   }
 
@@ -173,13 +173,13 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
     }
 
     if (mediaData){
-      return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv data-url='"+unescape(mediaData.url)+"' id='emb_audio-"+randomString(16)+"' class='embedRemoteAudioSpan'><samdiv class='audio'>" + exports.cleanEmbedAudioCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
+      return [{cls: clss.join(" "), extraOpenTags: "<samdiv data-url='"+unescape(mediaData.url)+"' id='emb_audio-"+randomString(16)+"' class='embedRemoteAudioSpan'><samdiv class='audio'>" + exports.cleanEmbedAudioCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}];
 
     }
 
   }
 
-  return cb();
+  return [];
 };
 
 
@@ -279,7 +279,7 @@ exports.aceInitialized = (hook, context, cb)=>{
   // var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
   
   editorInfo.ace_hasMediaOnSelection = _(hasMediaOnSelection).bind(context);
-  return cb();
+  return [];
 
   // padInner.contents().on("click", ".embedRemoteImageSpanLarge", function(e){
   //   var url = $(this).data("url")
