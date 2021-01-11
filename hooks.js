@@ -29,7 +29,7 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
   return cb();
 }
 
-exports.expressConfigure = async function (hookName, context) {
+exports.expressConfigure = function (hookName, context) {
   context.app.get('/p/getImage/:padId/:mediaId', function (req, res, next) {
     var s3  = new AWS.S3({
         accessKeyId: settings.ep_insert_media.storage.accessKeyId,
@@ -279,4 +279,6 @@ exports.expressConfigure = async function (hookName, context) {
         
 
   })
+
+  return context
 }
