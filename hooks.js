@@ -9,28 +9,28 @@ var path = require('path'),
     settings = require('ep_etherpad-lite/node/utils/Settings');
     AWS = require('aws-sdk');
     mime = require('mime-types')
-exports.eejsBlock_editbarMenuLeft = function (hook_name, args, cb) {
+exports.eejsBlock_editbarMenuLeft =  (hook_name, args, cb) =>{
   args.content = args.content + eejs.require("ep_insert_media/templates/editbarButtons.ejs", {}, module);
-  return cb();
+  [];
 }
 
-exports.eejsBlock_body = function (hook_name, args, cb) {
+exports.eejsBlock_body = (hook_name, args, cb) => {
   args.content = args.content + eejs.require("ep_insert_media/templates/modals.ejs", {}, module);
-  return cb();
+  return [];
 }
 
-exports.eejsBlock_scripts = function (hook_name, args, cb) {
+exports.eejsBlock_scripts = (hook_name, args, cb) =>{
   args.content = args.content + eejs.require("ep_insert_media/templates/scripts.ejs", {}, module);
-  return cb();
+  return [];
 }
 
-exports.eejsBlock_styles = function (hook_name, args, cb) {
+exports.eejsBlock_styles =  (hook_name, args, cb) =>{
   args.content = args.content + eejs.require("ep_insert_media/templates/styles.ejs", {}, module);
-  return cb();
+  return [];
 }
 
-exports.expressConfigure = function (hookName, context) {
-  context.app.get('/p/getImage/:padId/:mediaId', function (req, res, next) {
+exports.expressConfigure = (hookName, context) =>{
+  context.app.get('/p/getImage/:padId/:mediaId', (req, res, next) =>{
     var s3  = new AWS.S3({
         accessKeyId: settings.ep_insert_media.storage.accessKeyId,
         secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
@@ -59,7 +59,7 @@ exports.expressConfigure = function (hookName, context) {
     }
     
   })
-  context.app.get('/p/getVideo/:padId/:mediaId', function (req, res, next) {
+  context.app.get('/p/getVideo/:padId/:mediaId', (req, res, next) =>{
     var s3  = new AWS.S3({
         accessKeyId: settings.ep_insert_media.storage.accessKeyId,
         secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
@@ -89,7 +89,7 @@ exports.expressConfigure = function (hookName, context) {
  
 
 
-  context.app.get('/p/getMedia/:padId/:mediaId', function (req, res, next) {
+  context.app.get('/p/getMedia/:padId/:mediaId', (req, res, next) =>{
     var s3  = new AWS.S3({
         accessKeyId: settings.ep_insert_media.storage.accessKeyId,
         secretAccessKey: settings.ep_insert_media.storage.secretAccessKey,
@@ -116,7 +116,7 @@ exports.expressConfigure = function (hookName, context) {
 
   })
 
-  context.app.post('/p/:padId/pluginfw/ep_insert_media/upload', function (req, res, next) {
+  context.app.post('/p/:padId/pluginfw/ep_insert_media/upload', (req, res, next) =>{
     console.log(settings.ep_insert_media)
     var padId = req.params.padId;
     var storageConfig = settings.ep_insert_media.storage;
