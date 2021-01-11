@@ -11,7 +11,7 @@ var path = require('path'),
     mime = require('mime-types')
 exports.eejsBlock_editbarMenuLeft =  (hook_name, args, cb) =>{
   args.content = args.content + eejs.require("ep_insert_media/templates/editbarButtons.ejs", {}, module);
-  [];
+  return [];
 }
 
 exports.eejsBlock_body = (hook_name, args, cb) => {
