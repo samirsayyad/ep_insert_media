@@ -36,6 +36,7 @@ var collectContentPre = function collectContentPre(hook, context) {
 		console.log(existTagId,existTagId[1],"findit")
  		context.cc.doAttrib(context.state, 'insertEmbedAudio::' + atob(existTagId[1]) ) ;//JSON.stringify({"url":"https%3A//homepages.cae.wisc.edu/%7Eece533/images/boat.png","align":"Left","size":"Small"}));
 	}
+	return []
 };
 
 exports.collectContentPre = collectContentPre;

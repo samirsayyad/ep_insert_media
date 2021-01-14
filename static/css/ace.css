@@ -4,7 +4,7 @@
   line-height: 0;
   position: relative;
   /* height: 0; */
-  width: 790px;
+  width: 100%;
 }
 
 .embedMedia .media {
@@ -24,7 +24,7 @@
 .embedRemoteImageSpan{
   display: inline-block;
   line-height: 0;
-  width:50%;
+  width:100%;
   cursor: pointer;
 }
 .embedRemoteImage{
@@ -53,6 +53,7 @@
   display: inline-block;
   line-height: 0;
   cursor: pointer;
+  width: 100%;
 }
 .embedRemoteVideoSpan .character {
   font-size: 0;
@@ -71,7 +72,7 @@
 .embedRemoteAudioSpan{
   display: inline-block;
   line-height: 0;
-  width:50%;
+  width:100%;
   cursor: pointer;
 }
 .embedRemoteAudioSpan .character {

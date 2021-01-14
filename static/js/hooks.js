@@ -4,12 +4,13 @@ const copyPasteEvents = require('./copyPasteEvents');
 const hasMediaOnSelection =copyPasteEvents.hasMediaOnSelection;
 
 exports.aceSelectionChanged= function aceSelectionChanged(rep, context) {
-  console.log(context.callstack.type)
+  //console.log(context.callstack.type)
   // if (context.callstack.type === 'insertheading') {
   //   rep = context.rep;
   //   var headingTagId = ['headingTagId', randomString(16)];
   //   context.documentAttributeManager.setAttributesOnRange(rep.selStart, rep.selEnd, [headingTagId]);
   // }
+  return []
 }
 exports.postAceInit = function(hookName, context, cb) {
   var ace =context.ace
@@ -39,28 +40,28 @@ exports.postAceInit = function(hookName, context, cb) {
 
 
 }
-exports.aceInitInnerdocbodyHead = function(hook_name, args, cb) {
+exports.aceInitInnerdocbodyHead = (hook_name, args, cb) =>{
   args.iframeHTML.push('<link rel="stylesheet" type="text/css" href="/static/plugins/ep_insert_media/static/css/ace.css"/>');
-  return cb();
+  return [];
 };
 
-exports.aceAttribsToClasses = function(hook_name, args, cb) {
+exports.aceAttribsToClasses = (hook_name, args, cb) =>{
   console.log("aceAttribsToClasses",args)
 
   // copy process should add new type if added
-  if (args.key == 'embedMedia' && args.value != "")         return cb(["embedMedia:" + args.value]);
-  if (args.key == 'insertEmbedPicture' && args.value != "") return cb(["insertEmbedPicture:" + args.value]);
-  if (args.key == 'insertEmbedVideo' && args.value != "")   return cb(["insertEmbedVideo:" + args.value]);
-  if (args.key == 'insertEmbedAudio' && args.value != "")   return cb(["insertEmbedAudio:" + args.value]);
+  if (args.key == 'embedMedia' && args.value != "")         return ["embedMedia:" + args.value];
+  if (args.key == 'insertEmbedPicture' && args.value != "") return ["insertEmbedPicture:" + args.value];
+  if (args.key == 'insertEmbedVideo' && args.value != "")   return ["insertEmbedVideo:" + args.value];
+  if (args.key == 'insertEmbedAudio' && args.value != "")   return ["insertEmbedAudio:" + args.value];
   
-
+  return []
   //if (args.key == 'insertEmbedPicture_paste' && args.value != "") return cb(["insertEmbedPicture:" + atob(args.value)]);
 
   // if (args.key == 'insertEmbedPicture' && args.value == "embedRemoteImageSpanLarge")
   // return cb(["insertEmbedPictureBig:" + args.value]);
 };
 
-exports.aceCreateDomLine = function(hook_name, args, cb) {
+exports.aceCreateDomLine = (hook_name, args, cb) =>{
   if (args.cls.indexOf('embedMedia:') >= 0) {
     var clss = [];
     var argClss = args.cls.split(" ");
@@ -88,7 +89,9 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
         height= "540"
       }
       
-      return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv style='height:"+height+"px' id='emb_embedMedia-"+randomString(16)+"' class='embedMedia'><samdiv class='media'>" + exports.cleanEmbedCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
+      return [{cls: clss.join(" "), extraOpenTags: "<samdiv style='height:"+
+      height+"px' id='emb_embedMedia-"+randomString(16)+"' class='embedMedia'><samdiv class='media'>" + 
+      exports.cleanEmbedCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}];
     }
     
   }
@@ -113,7 +116,10 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
         console.log(e)
       }
       if(mediaData)
-        return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv data-size='"+mediaData.size+"' data-align='"+mediaData.align+"' data-url='"+unescape(mediaData.url)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan ep_insert_media_"+mediaData.size+" ep_insert_media_"+mediaData.align+"'><samdiv class='image'>" + exports.cleanEmbedPictureCode(unescape(mediaData.url)) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
+        return [{cls: clss.join(" "), 
+        extraOpenTags: "<samdiv data-size='"+mediaData.size+"' data-align='"+mediaData.align+
+        "' data-url='"+unescape(mediaData.url)+"' id='emb_img-"+randomString(16)+"' class='embedRemoteImageSpan'><samdiv class='image'>" + exports.cleanEmbedPictureCode(unescape(mediaData.url),mediaData.align,mediaData.size) +
+         "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}];
 
   }
 
@@ -139,7 +145,7 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
       console.log(e)
     }
     if(mediaData)
-      return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv data-url='"+unescape(mediaData.url)+"' id='emb_video-"+randomString(16)+"' class='embedRemoteVideoSpan'><samdiv class='video'>" + exports.cleanEmbedVideoCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
+      return [{cls: clss.join(" "), extraOpenTags: "<samdiv data-url='"+unescape(mediaData.url)+"' id='emb_video-"+randomString(16)+"' class='embedRemoteVideoSpan'><samdiv class='video'>" + exports.cleanEmbedVideoCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}];
 
   }
 
@@ -168,13 +174,13 @@ exports.aceCreateDomLine = function(hook_name, args, cb) {
     }
 
     if (mediaData){
-      return cb([{cls: clss.join(" "), extraOpenTags: "<samdiv data-url='"+unescape(mediaData.url)+"' id='emb_audio-"+randomString(16)+"' class='embedRemoteAudioSpan'><samdiv class='audio'>" + exports.cleanEmbedAudioCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}]);
+      return [{cls: clss.join(" "), extraOpenTags: "<samdiv data-url='"+unescape(mediaData.url)+"' id='emb_audio-"+randomString(16)+"' class='embedRemoteAudioSpan'><samdiv class='audio'>" + exports.cleanEmbedAudioCode(unescape(mediaData.url),mediaData) + "</samdiv><samdiv class='character'>", extraCloseTags: '</samdiv>'}];
 
     }
 
   }
 
-  return cb();
+  return [];
 };
 
 
@@ -221,13 +227,13 @@ exports.cleanEmbedAudioCode =  function(orig,mediaData) {
   var value = $.trim(orig);
   return '<audio class="audioClass ep_insert_media_'+mediaData.size+' ep_insert_media_'+mediaData.align+'" controls><source src="'+value+'" type="audio/mpeg"></video>';
 }
-exports.cleanEmbedVideoCode =  function(orig,mediaData) {
+exports.cleanEmbedVideoCode =  function(orig,mediaData,align,size) {
   var value = $.trim(orig);
   return '<video class="videoClass ep_insert_media_'+mediaData.size+' ep_insert_media_'+mediaData.align+'" controls><source src="'+value+'" type="video/mp4"></video>';
 }
-exports.cleanEmbedPictureCode = function(orig) {
+exports.cleanEmbedPictureCode = function(orig,align,size) {
   var value = $.trim(orig);
-  return "<img class='embedRemoteImage' src='"+value+"'>";
+  return "<img class='embedRemoteImage ep_insert_media_"+align+" ep_insert_media_"+size+"' src='"+value+"'>";
 }
 
 
@@ -274,7 +280,7 @@ exports.aceInitialized = (hook, context, cb)=>{
   // var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
   
   editorInfo.ace_hasMediaOnSelection = _(hasMediaOnSelection).bind(context);
-  return cb();
+  return [];
 
   // padInner.contents().on("click", ".embedRemoteImageSpanLarge", function(e){
   //   var url = $(this).data("url")
