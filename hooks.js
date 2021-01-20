@@ -41,7 +41,6 @@ exports.expressConfigure = (hookName, context) =>{
     try{
         var params = { Bucket: settings.ep_insert_media.storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`  };
         s3.getObject(params, function(err, data) {
-            console.log("data going to be ", params ,data , err)
             if (data ){
                 res.writeHead(200, {'Content-Type': 'image/jpeg'});
                 res.write(data.Body, 'binary');
@@ -117,7 +116,6 @@ exports.expressConfigure = (hookName, context) =>{
   })
 
   context.app.post('/p/:padId/pluginfw/ep_insert_media/upload', (req, res, next) =>{
-    console.log(settings.ep_insert_media)
     var padId = req.params.padId;
     var storageConfig = settings.ep_insert_media.storage;
     var msgError = null;
@@ -206,9 +204,7 @@ exports.expressConfigure = (hookName, context) =>{
                     s3.upload(params_upload, function(err, data) {
                         if (err)
                             console.log(err, err.stack,"error")
-                        else   
-                            console.log(data);
-    
+             
                         if (data){
                             return res.status(201).json({"type":settings.ep_insert_media.storage.type,"error":false,fileName :savedFilename ,fileType:fileType,data:data})
                         }else{
@@ -229,7 +225,6 @@ exports.expressConfigure = (hookName, context) =>{
                     busboy.on('error', done);
                     busboy.on('finish', function () {
                     if (uploadResult) {
-                        console.log("uploadResult",uploadResult)
                         uploadResult
                             .then(function (data) {
         

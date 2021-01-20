@@ -8,14 +8,12 @@ exports.pasteMedia = (e,ace,padInner) => {
   var objectMediaData = e.originalEvent.clipboardData.getData('text/objectMediaData');
 
   
-  console.log("come for paste",objectMediaData)
 
   if(objectMediaDataHtml && objectMediaData){
 
     objectMediaData = JSON.parse(objectMediaData)
     let rawHtml = JSON.parse(objectMediaDataHtml);
     rawHtml = $('<div></div>').append(rawHtml.raw);
-    console.log('first media', rawHtml.find('.embedRemoteImageSpan'));
 
     //insertEmbedPicture
     var elementCounter = 0
@@ -73,7 +71,6 @@ exports.pasteMedia = (e,ace,padInner) => {
     const selection = padInner.contents()[0].getSelection();
     if (!selection.rangeCount) return false;
 
-    console.log("before injecting",rawHtml)
     
     selection.getRangeAt(0).insertNode(rawHtml[0]);
 
@@ -90,7 +87,6 @@ exports.addTextOnClipboard = (e, ace, padInner) => {
   ace.callWithAce((ace) => {
     hasMediaOnSelection = ace.ace_hasMediaOnSelection();
   });
-  console.log("hasMediaOnSelection",hasMediaOnSelection)
   if (hasMediaOnSelection) {
     const range = padInner.contents()[0].getSelection().getRangeAt(0);
     const rawHtml = createHiddenDiv(range);
@@ -100,7 +96,6 @@ exports.addTextOnClipboard = (e, ace, padInner) => {
       const textSelected = rawHtml[0].textContent;
       html = buildHtmlToCopyWhenSelectionHasOnlyText(textSelected, range);
     }
-    console.log("this going put in media object",hasMediaOnSelection)
     e.originalEvent.clipboardData.setData('text/objectMediaDataHtml',JSON.stringify({raw: getHtml(html)}));
     e.originalEvent.clipboardData.setData('text/objectMediaData', JSON.stringify(hasMediaOnSelection) );
     e.preventDefault();
@@ -118,7 +113,6 @@ exports.hasMediaOnSelection = function(){
   const lastColumn = rep.selEnd[1];
   const selLastLine = rep.selEnd[0];
   const selectionOfMultipleLine = hasMultipleLineSelected(selFirstLine, selLastLine);
-  console.log("selectionOfMultipleLine,",selectionOfMultipleLine)
   if (selectionOfMultipleLine) {
     hasMedia = hasMediaOnMultipleLineSel(selFirstLine, selLastLine, rep, attributeManager);
   } else {
@@ -148,13 +142,10 @@ const htmlDecode = (input) => {
 
 const hasMediaOnMultipleLineSel = (selFirstLine, selLastLine, rep, attributeManager) => {
   let foundLineWithMedia = {};
-  console.log(selFirstLine, selLastLine,)
   for (let line = selFirstLine; line <= selLastLine; line++) {
-    console.log("we are going to process",line)
     const firstColumn = getFirstColumnOfSelection(line, rep, selFirstLine);
     const lastColumn = getLastColumnOfSelection(line, rep, selLastLine);
     const hasMedia = hasMediaOnLine(line, firstColumn, lastColumn, attributeManager);
-    console.log("hasMedia",hasMedia)
     if (hasMedia) {
       if (!foundLineWithMedia[hasMedia.elemenet]) foundLineWithMedia[hasMedia.elemenet] = [];
 
@@ -182,7 +173,6 @@ const hasMultipleLineSelected =
 
 const hasMediaOnLine = (lineNumber, firstColumn, lastColumn, attributeManager) => {
   let foundMediaOnLine = false;
-  console.log(lineNumber, firstColumn, lastColumn,)
   for (let column = firstColumn; column <= lastColumn && !foundMediaOnLine; column++) {
 
     // copy process should add new type if added also for pasted
@@ -264,7 +254,6 @@ const getLength = (line, rep) => {
 
 const buildHtmlWithFormattingTagsOfSelection = (html, range) => {
   const htmlOfParentNode = range.commonAncestorContainer.parentNode;
-  console.log("htmlOfParentNode",htmlOfParentNode)
   const tags = getTagsInSelection(htmlOfParentNode);
 
   // this case happens when we got a selection with one or more styling (bold, italic, underline,

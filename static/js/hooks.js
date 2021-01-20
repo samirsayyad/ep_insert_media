@@ -21,10 +21,8 @@ exports.postAceInit = function(hookName, context, cb) {
 
   var padOuter = $('iframe[name="ace_outer"]').contents();
   var padInner = padOuter.find('iframe[name="ace_inner"]');
-  console.log("sss",padInner)
   if (browser.chrome || browser.firefox) {
     padInner.contents().on('copy', (e) => {
-      console.log(e)
       copyPasteEvents.addTextOnClipboard(
           e, ace, padInner, false, null, null);
     });
@@ -46,8 +44,6 @@ exports.aceInitInnerdocbodyHead = (hook_name, args, cb) =>{
 };
 
 exports.aceAttribsToClasses = (hook_name, args, cb) =>{
-  console.log("aceAttribsToClasses",args)
-
   // copy process should add new type if added
   if (args.key == 'embedMedia' && args.value != "")         return ["embedMedia:" + args.value];
   if (args.key == 'insertEmbedPicture' && args.value != "") return ["insertEmbedPicture:" + args.value];
@@ -111,7 +107,6 @@ exports.aceCreateDomLine = (hook_name, args, cb) =>{
       }
       try{
         var mediaData = JSON.parse(value)
-        console.log("after ",mediaData)
       } catch(e) {
         console.log(e)
       }
@@ -255,7 +250,6 @@ exports.cleanEmbedCode = function (orig,mediaData) {
   } else if (value.indexOf('<') == 0) {
     value = $.trim(exports.sanitize(value));
     if (value != '') {
-        console.log([orig, value]);
       res = value;
     } else {
       console.warn("Invalid embed code: " + orig);
