@@ -260,3 +260,8 @@ div.btnAlignDirection .alignIcon path{
   color: #FFFFFF;
   margin-top: 36px;
 }
+.ep_insert_media_icon{
+  background-image: url("../images/icon.png");
+  width: 28px;
+  height: 28px;
+}
