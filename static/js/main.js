@@ -1,184 +1,9 @@
-var $ = require('ep_etherpad-lite/static/js/rjquery').$;
+'use strict';
 
-$(document).ready(function () {
-
-  var first =true;
- 
-  $(document).on('click', '.btnMediaSize', function() {
-      $('.btnMediaSize').removeClass('on');
-      $(this).addClass('on');
-      $("#selectedSize").val($(this).text())
-  });
-
-  $(document).on('click', '.btnAlignDirection', function() {
-    $('.btnAlignDirection').removeClass('on');
-    $(this).addClass('on');
-    $("#selectedAlign").val($(this).data("value"))
-  });
-  
-
-  $("#file").change(function(){
-    $("#embedMediaSrc").val("")
-  })
+const $ = require('ep_etherpad-lite/static/js/rjquery').$;
 
 
-  $("#insertEmbedMedia").click(function () {
-    // Can not use this yet, fix in main etherpad
-    // padeditbar.toogleDropDown("embedMediaModal");
-    var module = $("#embedMediaModal");
-    console.log(module)
-    if (!module.hasClass('insertEmbedMedia-show')) {
-      module.addClass("insertEmbedMedia-show");
-    } else {
-      module.removeClass("insertEmbedMedia-show");
-    }
-  });
-
-  $("#doEmbedMedia").click(function () {
-    var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
-    //console.log($("#mediaSizeSelect btnMediaSize on").text(),"wwwwwwwwwwwww")
-    
-    //$("#embedMediaModal").slideUp("fast");
-    $("#embedMediaModal").removeClass("insertEmbedMedia-show");
-    var url =$("#embedMediaSrc")[0].value
-    var imageSize =$("#selectedSize").val()
-    var imageAlign =$("#selectedAlign").val()
-    var imageUrl = escape(url) ;
-    var mediaData = {
-      "url" : imageUrl,
-      "align" : imageAlign,
-      "size" : imageSize
-    }
-     if(url!=""){
-      if (url.indexOf('http://') == 0 || url.indexOf('https://') == 0) {
-        if (url.indexOf("www.youtube.com") != -1 || url.indexOf("youtu.be") != -1 || url.indexOf("vimeo.com") != -1) {
-          return padeditor.ace.callWithAce(function (ace) {
-            var rep = ace.ace_getRep();
-            ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
-            ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["embedMedia", JSON.stringify(mediaData)]]);
-          }, "embedMedia");
-        }else{
-          var img = new Image();
-        
-          img.onload = function(){
-            return padeditor.ace.callWithAce(function (ace) {
-              var rep = ace.ace_getRep();
-              ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
-              ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-              ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", JSON.stringify(mediaData)]]);
-            }, "insertEmbedPicture");
-          }  
-          };
-          img.onerror = function(){
-              if (!$("#editorcontainerbox").hasClass("flex-layout")) {
-                $.gritter.add({
-                  'title': 'Error',
-                  'text': 'ep_insert_media: image is not supported.',
-                  'sticky': true,
-                  'class_name': 'error'
-                });
-              }
-          }
-        
-         img.src = url;
-       
-      }
-
-      $("#embedMediaSrc").val("")
-
-    }else{
-      uploadAction(mediaData)
-    }
-    
-  });
-
-  $("#cancelEmbedMedia").click(function () {
-    //$("#embedMediaModal").slideUp("fast");
-    $("#embedMediaModal").removeClass("insertEmbedMedia-show");
-  });
-
-
-
-})
-
-  function uploadAction(mediaData){
-    var padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
-
-    var fd = new FormData();
-    var files = $('#file')[0].files[0];
-    fd.append('file',files);
-    $.ajax({
-        url: '/p/' + clientVars.padId + '/pluginfw/ep_insert_media/upload',
-        type: 'post',
-        data: fd,
-        contentType: false,
-        processData: false,
-        success: function(response){
-            if(response&&response.error==false ){
-
-                if (isImage(response.fileType)){
-                  if (response.type =="s3")
-                    var image_url ='/p/getImage/'+response.fileName
-                  else
-                    var image_url =response.fileName
-                  mediaData.url =  escape(image_url) ;
-                  padeditor.ace.callWithAce(function (ace) {
-                    var rep = ace.ace_getRep();
-                    ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
-                    ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-                    ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedPicture", JSON.stringify(mediaData)]]);
-                  }, "insertEmbedPicture");
-                }if (isVideo(response.fileType)){
-                  if (response.type =="s3")
-                    var video_url ='/p/getVideo/'+response.fileName
-                  else
-                    var video_url =response.fileName
-                    mediaData.url =  escape(video_url) ;
-
-                  padeditor.ace.callWithAce(function (ace) {
-                    var rep = ace.ace_getRep();
-                    ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
-                    ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-                    ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedVideo", JSON.stringify(mediaData)]]);
-                  }, "insertEmbedVideo");
-                }if (isAudio(response.fileType)){
-                  if (response.type =="s3")
-                    var audio_url ='/p/getMedia/'+response.fileName
-                  else
-                    var audio_url =response.fileName
-                    mediaData.url =  escape(audio_url) ;
-
-                  padeditor.ace.callWithAce(function (ace) {
-                    var rep = ace.ace_getRep();
-                    ace.ace_replaceRange(rep.selStart, rep.selEnd, "E");
-                    ace.ace_performSelectionChange([rep.selStart[0],rep.selStart[1]-1], rep.selStart, false);
-                    ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [["insertEmbedAudio", JSON.stringify(mediaData)]]);
-                  }, "insertEmbedAudio");
-                }
-              
-               
-                
-                $("#embedMediaModal").removeClass("insertEmbedMedia-show");
-                $("#file").val("")
-            }else{
-                $.gritter.add({
-                  'title': 'Error',
-                  'text': 'ep_insert_media: '+response.error,
-                  'sticky': true,
-                  'class_name': 'error'
-                });
-            }
-        },
-    });
-  } 
-
-
-
-
- 
-
-function isImage (filename) {
+const isImage = (filename) => {
   switch (filename.toLowerCase()) {
     case '.jpg':
     case '.gif':
@@ -186,13 +11,13 @@ function isImage (filename) {
     case '.png':
     case '.jpeg':
 
-      //etc
+      // etc
       return true;
   }
   return false;
-}
+};
 
-function isVideo (filename) {
+const isVideo = (filename) => {
   switch (filename.toLowerCase()) {
     case '.m4v':
     case '.avi':
@@ -204,9 +29,9 @@ function isVideo (filename) {
       return true;
   }
   return false;
-}
+};
 
-function isAudio (filename) {
+const isAudio = (filename) => {
   switch (filename.toLowerCase()) {
     case '.mp3':
     case '.ogg':
@@ -220,4 +45,157 @@ function isAudio (filename) {
       return true;
   }
   return false;
-}
+};
+
+const uploadAction = (mediaData) => {
+  const padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
+
+  const fd = new FormData();
+  const files = $('#file')[0].files[0];
+  fd.append('file', files);
+  $.ajax({
+    url: `/p/${clientVars.padId}/pluginfw/ep_insert_media/upload`,
+    type: 'post',
+    data: fd,
+    contentType: false,
+    processData: false,
+    success: (response) => {
+      if (response && response.error === false) {
+        if (isImage(response.fileType)) {
+          let imageUrl;
+          if (response.type === 's3') imageUrl = `/p/getImage/${response.fileName}`;
+          else imageUrl = response.fileName;
+          mediaData.url = escape(imageUrl);
+          padeditor.ace.callWithAce((ace) => {
+            const rep = ace.ace_getRep();
+            ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
+            ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
+            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['insertEmbedPicture', JSON.stringify(mediaData)]]);
+          }, 'insertEmbedPicture');
+        } if (isVideo(response.fileType)) {
+          let videoUrl;
+          if (response.type === 's3') videoUrl = `/p/getVideo/${response.fileName}`;
+          else videoUrl = response.fileName;
+          mediaData.url = escape(videoUrl);
+
+          padeditor.ace.callWithAce((ace) => {
+            const rep = ace.ace_getRep();
+            ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
+            ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
+            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['insertEmbedVideo', JSON.stringify(mediaData)]]);
+          }, 'insertEmbedVideo');
+        } if (isAudio(response.fileType)) {
+          let audioUrl;
+          if (response.type === 's3') audioUrl = `/p/getMedia/${response.fileName}`;
+          else audioUrl = response.fileName;
+          mediaData.url = escape(audioUrl);
+
+          padeditor.ace.callWithAce((ace) => {
+            const rep = ace.ace_getRep();
+            ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
+            ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
+            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['insertEmbedAudio', JSON.stringify(mediaData)]]);
+          }, 'insertEmbedAudio');
+        }
+
+
+        $('#embedMediaModal').removeClass('insertEmbedMedia-show');
+        $('#file').val('');
+      } else {
+        $.gritter.add({
+          title: 'Error',
+          text: `ep_insert_media: ${response.error}`,
+          sticky: true,
+          className: 'error',
+        });
+      }
+    },
+  });
+};
+$(document).ready(() => {
+  $(document).on('click', '.btnMediaSize', function () {
+    $('.btnMediaSize').removeClass('on');
+    $(this).addClass('on');
+    $('#selectedSize').val($(this).text());
+  });
+
+  $(document).on('click', '.btnAlignDirection', function () {
+    $('.btnAlignDirection').removeClass('on');
+    $(this).addClass('on');
+    $('#selectedAlign').val($(this).data('value'));
+  });
+
+
+  $('#file').change(() => {
+    $('#embedMediaSrc').val('');
+  });
+
+
+  $('#insertEmbedMedia').click(() => {
+    // Can not use this yet, fix in main etherpad
+    // padeditbar.toogleDropDown("embedMediaModal");
+    const module = $('#embedMediaModal');
+    console.log(module);
+    if (!module.hasClass('insertEmbedMedia-show')) {
+      module.addClass('insertEmbedMedia-show');
+    } else {
+      module.removeClass('insertEmbedMedia-show');
+    }
+  });
+
+  $('#doEmbedMedia').click(() => {
+    const padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
+    $('#embedMediaModal').removeClass('insertEmbedMedia-show');
+    const url = $('#embedMediaSrc')[0].value;
+    const imageSize = $('#selectedSize').val();
+    const imageAlign = $('#selectedAlign').val();
+    const imageUrl = escape(url);
+    const mediaData = {
+      url: imageUrl,
+      align: imageAlign,
+      size: imageSize,
+    };
+    if (url !== '') {
+      const img = new Image();
+
+      if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+        if (url.indexOf('www.youtube.com') !== -1 || url.indexOf('youtu.be') !== -1 || url.indexOf('vimeo.com') !== -1) {
+          return padeditor.ace.callWithAce((ace) => {
+            const rep = ace.ace_getRep();
+            ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
+            ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
+            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['embedMedia', JSON.stringify(mediaData)]]);
+          }, 'embedMedia');
+        } else {
+          img.onload = () => padeditor.ace.callWithAce((ace) => {
+            const rep = ace.ace_getRep();
+            ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
+            ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
+            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['insertEmbedPicture', JSON.stringify(mediaData)]]);
+          }, 'insertEmbedPicture');
+        }
+        img.onerror = () => {
+          if (!$('#editorcontainerbox').hasClass('flex-layout')) {
+            $.gritter.add({
+              title: 'Error',
+              text: 'ep_insert_media: image is not supported.',
+              sticky: true,
+              className: 'error',
+            });
+          }
+        };
+
+        img.src = url;
+      }
+
+      $('#embedMediaSrc').val('');
+    } else {
+      uploadAction(mediaData);
+    }
+  });
+
+  $('#cancelEmbedMedia').click(() => {
+    // $("#embedMediaModal").slideUp("fast");
+    $('#embedMediaModal').removeClass('insertEmbedMedia-show');
+  });
+});

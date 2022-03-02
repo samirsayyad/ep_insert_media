@@ -17,11 +17,34 @@
     "url": "^0.11.0",
     "uuid": "^8.3.0"
   },
+  "scripts": {
+    "lint:fix": "eslint --fix .;",
+    "lint:dry": "eslint --fix-dry-run ."
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": "etherpad/plugin",
+    "ignorePatterns": [],
+    "globals": {
+      "$": true,
+			"documentReady": true,
+			"pad": true,
+			"it":true,
+			"describe":true,
+			"before":true,
+			"process":true
+    }
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/samirsayyad/ep_insert_media.git"
   },
   "engines": {
     "node": "*"
+  },
+  "devDependencies": {
+    "eslint": "^8.10.0",
+    "eslint-config-etherpad": "^3.0.3",
+    "typescript": "^4.6.2"
   }
 }

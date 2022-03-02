@@ -18,7 +18,6 @@
         "aceCreateDomLine": "ep_insert_media/static/js/hooks:aceCreateDomLine",
         "aceInitialized" : "ep_insert_media/static/js/hooks:aceInitialized",
         "postAceInit":"ep_insert_media/static/js/hooks:postAceInit",
-        "aceSelectionChanged":"ep_insert_media/static/js/hooks:aceSelectionChanged",
         "collectContentPre" : "ep_insert_media/static/js/collectContentPre"
       }
     }
