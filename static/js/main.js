@@ -135,7 +135,6 @@ $(document).ready(() => {
     // Can not use this yet, fix in main etherpad
     // padeditbar.toogleDropDown("embedMediaModal");
     const module = $('#embedMediaModal');
-    console.log(module);
     if (!module.hasClass('insertEmbedMedia-show')) {
       module.addClass('insertEmbedMedia-show');
     } else {
@@ -155,20 +154,14 @@ $(document).ready(() => {
       align: imageAlign,
       size: imageSize,
     };
-    console.log('[ep_insert_media]: ', mediaData);
     if ((url === '')) {
       uploadAction(mediaData);
       return;
     }
-
     const separatedUrl = new URL(url);
-    console.log('[ep_insert_media]: ', separatedUrl);
-
     const img = new Image();
     if (!['http:', 'https:'].includes(separatedUrl.protocol)) return;
     $('#embedMediaSrc').val('');
-    console.log('[ep_insert_media]: ', 'embedMediaSrc');
-
     if (['www.youtube.com', 'youtu.be', 'vimeo.com'].includes(separatedUrl.host)) {
       return padeditor.ace.callWithAce((ace) => {
         const rep = ace.ace_getRep();
@@ -177,8 +170,6 @@ $(document).ready(() => {
         ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['embedMedia', JSON.stringify(mediaData)]]);
       }, 'embedMedia');
     }
-    console.log('[ep_insert_media]: ', 'insertEmbedPicture');
-
     img.onload = () => padeditor.ace.callWithAce((ace) => {
       const rep = ace.ace_getRep();
       ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
@@ -197,8 +188,6 @@ $(document).ready(() => {
       }
     };
     img.src = url;
-
-    console.log('[ep_insert_media]: ', url, img);
   });
 
   $('#cancelEmbedMedia').click(() => {

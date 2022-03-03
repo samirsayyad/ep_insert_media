@@ -29,11 +29,30 @@ exports.aceInitInnerdocbodyHead = (_hookName, args) => {
 
 exports.aceAttribsToClasses = (_hookName, args) => {
   // copy process should add new type if added
-  if (args.key === 'embedMedia' && args.value !== '') return [`embedMedia:${args.value}`];
-  if (args.key === 'insertEmbedPicture' && args.value !== '') return [`insertEmbedPicture:${args.value}`];
-  if (args.key === 'insertEmbedVideo' && args.value !== '') return [`insertEmbedVideo:${args.value}`];
-  if (args.key === 'insertEmbedAudio' && args.value !== '') return [`insertEmbedAudio:${args.value}`];
-
+  if (args.key === 'embedMedia' && args.value !== '') {
+    return ['ep_insert_media', JSON.stringify({
+      func: 'embedMedia',
+      data: args.value,
+    })];
+  }
+  if (args.key === 'insertEmbedPicture' && args.value !== '') {
+    return ['ep_insert_media', JSON.stringify({
+      func: 'insertEmbedPicture',
+      data: args.value,
+    })];
+  }
+  if (args.key === 'insertEmbedVideo' && args.value !== '') {
+    return ['ep_insert_media', JSON.stringify({
+      func: 'insertEmbedVideo',
+      data: args.value,
+    })];
+  }
+  if (args.key === 'insertEmbedAudio' && args.value !== '') {
+    return ['ep_insert_media', JSON.stringify({
+      func: 'insertEmbedAudio',
+      data: args.value,
+    })];
+  }
   return [];
 };
 
@@ -41,21 +60,19 @@ exports.aceAttribsToClasses = (_hookName, args) => {
 exports.aceCreateDomLine = (_hookName, args) => {
   try {
     const argClss = args.cls.split(' ');
-    if (argClss.length < 2) return;
-    const [first, ...rest] = argClss[1].split(':'); // first means the func and rest is data
-    console.log('[ep_insert_media]', argClss);
-    const mediadata = JSON.parse(rest.join(':'));
-    console.log('[ep_insert_media] mediadata ', mediadata);
-
-    switch (first) {
+    if (argClss.length < 2) return [];
+    if (argClss[1] !== 'ep_insert_media') return [];
+    const mediaData = JSON.parse(argClss[2]);
+    const data = JSON.parse(mediaData.data);
+    switch (mediaData.func) {
       case 'embedMedia':
-        return mediaHandlers.embedMedia(args.cls, mediadata);
+        return mediaHandlers.embedMedia(args.cls, data);
       case 'insertEmbedPicture':
-        return mediaHandlers.insertEmbedPicture(args.cls, mediadata);
+        return mediaHandlers.insertEmbedPicture(args.cls, data);
       case 'insertEmbedVideo':
-        return mediaHandlers.insertEmbedVideo(args.cls, mediadata);
+        return mediaHandlers.insertEmbedVideo(args.cls, data);
       case 'insertEmbedAudio':
-        return mediaHandlers.insertEmbedAudio(args.cls, mediadata);
+        return mediaHandlers.insertEmbedAudio(args.cls, data);
       default:
         return [];
     }
