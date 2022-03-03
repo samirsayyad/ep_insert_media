@@ -43,7 +43,10 @@ exports.aceCreateDomLine = (_hookName, args) => {
     const argClss = args.cls.split(' ');
     if (argClss.length < 2) return;
     const [first, ...rest] = argClss[1].split(':'); // first means the func and rest is data
+    console.log('[ep_insert_media]', argClss);
     const mediadata = JSON.parse(rest.join(':'));
+    console.log('[ep_insert_media] mediadata ', mediadata);
+
     switch (first) {
       case 'embedMedia':
         return mediaHandlers.embedMedia(args.cls, mediadata);
