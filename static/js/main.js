@@ -155,43 +155,50 @@ $(document).ready(() => {
       align: imageAlign,
       size: imageSize,
     };
-    if (url !== '') {
-      const img = new Image();
-
-      if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
-        if (url.indexOf('www.youtube.com') !== -1 || url.indexOf('youtu.be') !== -1 || url.indexOf('vimeo.com') !== -1) {
-          return padeditor.ace.callWithAce((ace) => {
-            const rep = ace.ace_getRep();
-            ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
-            ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
-            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['embedMedia', JSON.stringify(mediaData)]]);
-          }, 'embedMedia');
-        } else {
-          img.onload = () => padeditor.ace.callWithAce((ace) => {
-            const rep = ace.ace_getRep();
-            ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
-            ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
-            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['insertEmbedPicture', JSON.stringify(mediaData)]]);
-          }, 'insertEmbedPicture');
-        }
-        img.onerror = () => {
-          if (!$('#editorcontainerbox').hasClass('flex-layout')) {
-            $.gritter.add({
-              title: 'Error',
-              text: 'ep_insert_media: image is not supported.',
-              sticky: true,
-              className: 'error',
-            });
-          }
-        };
-
-        img.src = url;
-      }
-
-      $('#embedMediaSrc').val('');
-    } else {
+    console.log('[ep_insert_media]: ', mediaData);
+    if ((url === '')) {
       uploadAction(mediaData);
+      return;
     }
+
+    const separatedUrl = new URL(url);
+    console.log('[ep_insert_media]: ', separatedUrl);
+
+    const img = new Image();
+    if (!['http:', 'https:'].includes(separatedUrl.protocol)) return;
+    $('#embedMediaSrc').val('');
+    console.log('[ep_insert_media]: ', 'embedMediaSrc');
+
+    if (['www.youtube.com', 'youtu.be', 'vimeo.com'].includes(separatedUrl.host)) {
+      return padeditor.ace.callWithAce((ace) => {
+        const rep = ace.ace_getRep();
+        ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
+        ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
+        ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['embedMedia', JSON.stringify(mediaData)]]);
+      }, 'embedMedia');
+    }
+    console.log('[ep_insert_media]: ', 'insertEmbedPicture');
+
+    img.onload = () => padeditor.ace.callWithAce((ace) => {
+      const rep = ace.ace_getRep();
+      ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
+      ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
+      ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['insertEmbedPicture', JSON.stringify(mediaData)]]);
+    }, 'insertEmbedPicture');
+
+    img.onerror = () => {
+      if (!$('#editorcontainerbox').hasClass('flex-layout')) {
+        $.gritter.add({
+          title: 'Error',
+          text: 'ep_insert_media: image is not supported.',
+          sticky: true,
+          className: 'error',
+        });
+      }
+    };
+    img.src = url;
+
+    console.log('[ep_insert_media]: ', url, img);
   });
 
   $('#cancelEmbedMedia').click(() => {
