@@ -42,7 +42,6 @@ exports.expressConfigure = (_hookName, context) => {
     try {
       const params = {Bucket: settings.ep_insert_media.s3Storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`};
       s3.getObject(params, (err, data) => {
-        console.log(err.message, data);
         if (data) {
           res.writeHead(200, {'Content-Type': 'image/jpeg'});
           res.write(data.Body, 'binary');
@@ -54,7 +53,7 @@ exports.expressConfigure = (_hookName, context) => {
         }
       });
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error.message);
     }
   });
 
@@ -80,7 +79,7 @@ exports.expressConfigure = (_hookName, context) => {
         }
       });
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     }
   });
 
@@ -107,7 +106,7 @@ exports.expressConfigure = (_hookName, context) => {
         }
       });
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
     }
   });
 
@@ -124,49 +123,34 @@ exports.expressConfigure = (_hookName, context) => {
     let finished;
 
     bb.on('file', async (name, file, info) => {
-      const {filename, encoding, mimeType} = info;
-      console.log(
-          `File [${name}]: filename: %j, encoding: %j, mimeType: %j`,
-          filename,
-          encoding,
-          mimeType,
-      );
+      const {filename, mimeType} = info;
       const newFileName = uuid.v4();
-
       const fileType = path.extname(filename);
       const savedFilename = path.join(padId, newFileName + fileType);
 
       if (settings.ep_insert_media.localStorage) {
         uploadResult = await fileHandlers.localUploadMedia(file, mimeType, savedFilename, fileType);
         if (finished) {
-          // res.writeHead(200, {Connection: 'close', Location: '/'});
           res.status(201).json(uploadResult);
           res.end();
         }
       }
       if (settings.ep_insert_media.s3Storage) {
-        uploadResult = await fileHandlers.s3UploadMedia(file, savedFilename, fileType);
+        fileHandlers.s3UploadMedia(file, savedFilename, fileType, (err, data) => {
+          if (err) console.error(err, err.stack, 'error');
+          if (data) {
+            res.status(201).json({type: 's3', error: false, fileName: savedFilename, fileType, data});
+            res.end();
+          } else {
+            res.status(400).json({type: 's3', error: true, fileName: savedFilename, fileType, data});
+            res.end();
+          }
+        });
       }
-
-      file.on('data', (data) => {
-        console.log('uploadResult data', uploadResult);
-
-        console.log(`File [${name}] got ${data.length} bytes`);
-      })
-          .on('close', () => {
-            console.log(`File [${name}] done`);
-          });
     });
-    bb.on('field', (name, val, info) => {
-      console.log(`Field [${name}]: value: %j`, val);
-    });
+
     bb.on('close', () => {
-      console.log('Done parsing form!', uploadResult);
-      if (uploadResult) {
-        res.status(201).json(uploadResult);
-        res.end();
-      }
-      finished = true; // related to localstorage
+      finished = true; // related to localStorage
     });
 
     return req.pipe(bb);

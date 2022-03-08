@@ -6,7 +6,7 @@ const settings = require('ep_etherpad-lite/node/utils/Settings');
 const AWS = require('aws-sdk');
 const path = require('path');
 
-const s3UploadMedia = async (file, savedFilename, fileType) => {
+const s3UploadMedia = async (file, savedFilename, fileType, callback) => {
   const s3 = new AWS.S3({
     accessKeyId: settings.ep_insert_media.s3Storage.accessKeyId,
     secretAccessKey: settings.ep_insert_media.s3Storage.secretAccessKey,
@@ -20,18 +20,7 @@ const s3UploadMedia = async (file, savedFilename, fileType) => {
     Key: savedFilename, // File name you want to save as in S3
     Body: file,
   };
-  const uploadResult = await s3.upload(paramsUpload);
-  return {type: 's3', error: false, fileName: savedFilename, fileType, data: uploadResult};
-
-  // s3.upload(paramsUpload, (err, data) => {
-  //   if (err) console.log(err, err.stack, 'error');
-
-  //   if (data) {
-  //     return {type: settings.ep_insert_media.s3Storage.type, error: false, fileName: savedFilename, fileType, data};
-  //   } else {
-  //     return err.stack.substring(0, err.stack.indexOf('\n'));
-  //   }
-  // });
+  s3.upload(paramsUpload, callback);
 };
 
 const localUploadMedia = async (file, mimetype, savedFilename, fileType, busboy, done) => {
@@ -52,22 +41,8 @@ const localUploadMedia = async (file, mimetype, savedFilename, fileType, busboy,
     const uploadResult = await imageUpload.upload(file, {type: mimetype, filename: finalSavedFilename});
     if (uploadResult) { return {type: 'localStorage', error: false, fileName: accessPath, fileType}; } else { return null; }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
-
-  // busboy.on('error', done);
-  // busboy.on('finish', () => {
-  //   if (uploadResult) {
-  //     uploadResult
-  //         .then((data) => {
-  //           if (accessPath) data = accessPath;
-  //           return {type: settings.ep_insert_media.storage.type, error: false, fileName: data, fileType};
-  //         })
-  //         .catch((err) => {
-  //           err.stack;
-  //         });
-  //   }
-  // });
 };
 module.exports = {localUploadMedia,
   s3UploadMedia};

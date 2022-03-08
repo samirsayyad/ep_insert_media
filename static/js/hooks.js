@@ -77,7 +77,7 @@ exports.aceCreateDomLine = (_hookName, args) => {
         return [];
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 };
 
