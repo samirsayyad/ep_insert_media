@@ -9,6 +9,12 @@ const mime = require('mime-types');
 const fileHandlers = require('./handlers/fileHandlers');
 const uuid = require('uuid');
 
+exports.clientVars = (hook, context, callback) => ({
+  ep_insert_media: {
+    settings: settings.ep_insert_media,
+  },
+});
+
 exports.eejsBlock_editbarMenuLeft = (_hookName, args) => {
   args.content += eejs.require('ep_insert_media/templates/editbarButtons.ejs', {}, module);
   return [];

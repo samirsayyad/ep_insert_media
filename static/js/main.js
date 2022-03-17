@@ -69,6 +69,13 @@ const uploadAction = (mediaData) => {
     data: fd,
     contentType: false,
     processData: false,
+    beforeSend: () => {
+      showLoading(mediaData);
+    },
+    error: (xhr, textStatus, thrownError) => {
+      alert(xhr.status);
+      alert(thrownError);
+    },
     success: (response) => {
       const padOuter = $('iframe[name="ace_outer"]').contents();
       const padInner = padOuter.find('iframe[name="ace_inner"]');
@@ -81,6 +88,7 @@ const uploadAction = (mediaData) => {
           mediaData.url = escape(imageUrl);
           padeditor.ace.callWithAce((ace) => {
             const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
+            if (!rep.length) return;
             ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
             ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
             ace.ace_performDocumentApplyAttributesToRange(rep[0][0], rep[0][1], [['insertEmbedPicture', JSON.stringify(mediaData)]]);
@@ -93,6 +101,7 @@ const uploadAction = (mediaData) => {
 
           padeditor.ace.callWithAce((ace) => {
             const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
+            if (!rep.length) return;
             ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
             ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
             ace.ace_performDocumentApplyAttributesToRange(rep[0][0], rep[0][1], [['insertEmbedVideo', JSON.stringify(mediaData)]]);
@@ -105,6 +114,7 @@ const uploadAction = (mediaData) => {
 
           padeditor.ace.callWithAce((ace) => {
             const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
+            if (!rep.length) return;
             ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
             ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
             ace.ace_performDocumentApplyAttributesToRange(rep[0][0], rep[0][1], [['insertEmbedAudio', JSON.stringify(mediaData)]]);
@@ -157,7 +167,6 @@ $(document).ready(() => {
 
   $('#doEmbedMedia').click(() => {
     const padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
-    $('#embedMediaModal').removeClass('insertEmbedMedia-show');
     const url = $('#embedMediaSrc')[0].value;
     const imageSize = $('#selectedSize').val();
     const imageAlign = $('#selectedAlign').val();
@@ -167,14 +176,35 @@ $(document).ready(() => {
       align: imageAlign,
       size: imageSize,
     };
-    showLoading(mediaData);
-    const padOuter = $('iframe[name="ace_outer"]').contents();
-    const padInner = padOuter.find('iframe[name="ace_inner"]');
+    $('#embedMediaModal').removeClass('insertEmbedMedia-show');
 
     if ((url === '')) {
+      const files = $('#file')[0].files[0];
+      if (!files) {
+        $.gritter.add({
+          title: 'Error',
+          text: 'You didn\'t select or enter any media.',
+          class_name: 'error',
+        });
+        return;
+      }
+      if (files.size > clientVars.ep_insert_media.settings.maxFileSize) {
+        $.gritter.add({
+          title: 'Error',
+          text: 'Maximum file size exceeded. (50 MB Limit)',
+          class_name: 'error',
+        });
+        $('#file').val(null);
+        return;
+      }
       uploadAction(mediaData);
       return;
     }
+
+    const padOuter = $('iframe[name="ace_outer"]').contents();
+    const padInner = padOuter.find('iframe[name="ace_inner"]');
+
+    showLoading(mediaData);
     const separatedUrl = new URL(url);
     const img = new Image();
     if (!['http:', 'https:'].includes(separatedUrl.protocol)) return;
@@ -182,6 +212,7 @@ $(document).ready(() => {
     if (['www.youtube.com', 'youtu.be', 'vimeo.com'].includes(separatedUrl.host)) {
       return padeditor.ace.callWithAce((ace) => {
         const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
+        if (!rep.length) return;
         ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
         ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
         ace.ace_performDocumentApplyAttributesToRange(rep[0][0], rep[0][1], [['embedMedia', JSON.stringify(mediaData)]]);
@@ -189,6 +220,7 @@ $(document).ready(() => {
     }
     img.onload = () => padeditor.ace.callWithAce((ace) => {
       const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
+      if (!rep.length) return;
       ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
       ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
       ace.ace_performDocumentApplyAttributesToRange(rep[0][0], rep[0][1], [['insertEmbedPicture', JSON.stringify(mediaData)]]);

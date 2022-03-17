@@ -9,7 +9,8 @@
         "eejsBlock_scripts": "ep_insert_media/server/hooks:eejsBlock_scripts",
         "eejsBlock_styles": "ep_insert_media/server/hooks:eejsBlock_styles",
         "eejsBlock_body": "ep_insert_media/server/hooks:eejsBlock_body",
-        "expressConfigure": "ep_insert_media/server/hooks:expressConfigure"
+        "expressConfigure": "ep_insert_media/server/hooks:expressConfigure",
+				"clientVars": "ep_insert_media/server/hooks:clientVars"
 
       },
       "client_hooks": {
