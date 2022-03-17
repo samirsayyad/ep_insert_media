@@ -47,6 +47,16 @@ const isAudio = (filename) => {
   return false;
 };
 
+const showLoading = (mediaData) => {
+  const padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
+  padeditor.ace.callWithAce((ace) => {
+    const rep = ace.ace_getRep();
+    ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
+    ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
+    ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['insertMediaLoading', JSON.stringify(mediaData)]]);
+  }, 'insertMediaLoading');
+};
+
 const uploadAction = (mediaData) => {
   const padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
 
@@ -60,6 +70,9 @@ const uploadAction = (mediaData) => {
     contentType: false,
     processData: false,
     success: (response) => {
+      const padOuter = $('iframe[name="ace_outer"]').contents();
+      const padInner = padOuter.find('iframe[name="ace_inner"]');
+
       if (response && response.error === false) {
         if (isImage(response.fileType)) {
           let imageUrl;
@@ -67,10 +80,10 @@ const uploadAction = (mediaData) => {
           else imageUrl = response.fileName;
           mediaData.url = escape(imageUrl);
           padeditor.ace.callWithAce((ace) => {
-            const rep = ace.ace_getRep();
-            ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
-            ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
-            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['insertEmbedPicture', JSON.stringify(mediaData)]]);
+            const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
+            ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
+            ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
+            ace.ace_performDocumentApplyAttributesToRange(rep[0][0], rep[0][1], [['insertEmbedPicture', JSON.stringify(mediaData)]]);
           }, 'insertEmbedPicture');
         } if (isVideo(response.fileType)) {
           let videoUrl;
@@ -79,10 +92,10 @@ const uploadAction = (mediaData) => {
           mediaData.url = escape(videoUrl);
 
           padeditor.ace.callWithAce((ace) => {
-            const rep = ace.ace_getRep();
-            ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
-            ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
-            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['insertEmbedVideo', JSON.stringify(mediaData)]]);
+            const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
+            ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
+            ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
+            ace.ace_performDocumentApplyAttributesToRange(rep[0][0], rep[0][1], [['insertEmbedVideo', JSON.stringify(mediaData)]]);
           }, 'insertEmbedVideo');
         } if (isAudio(response.fileType)) {
           let audioUrl;
@@ -91,10 +104,10 @@ const uploadAction = (mediaData) => {
           mediaData.url = escape(audioUrl);
 
           padeditor.ace.callWithAce((ace) => {
-            const rep = ace.ace_getRep();
-            ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
-            ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
-            ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['insertEmbedAudio', JSON.stringify(mediaData)]]);
+            const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
+            ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
+            ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
+            ace.ace_performDocumentApplyAttributesToRange(rep[0][0], rep[0][1], [['insertEmbedAudio', JSON.stringify(mediaData)]]);
           }, 'insertEmbedAudio');
         }
 
@@ -154,6 +167,10 @@ $(document).ready(() => {
       align: imageAlign,
       size: imageSize,
     };
+    showLoading(mediaData);
+    const padOuter = $('iframe[name="ace_outer"]').contents();
+    const padInner = padOuter.find('iframe[name="ace_inner"]');
+
     if ((url === '')) {
       uploadAction(mediaData);
       return;
@@ -164,17 +181,17 @@ $(document).ready(() => {
     $('#embedMediaSrc').val('');
     if (['www.youtube.com', 'youtu.be', 'vimeo.com'].includes(separatedUrl.host)) {
       return padeditor.ace.callWithAce((ace) => {
-        const rep = ace.ace_getRep();
-        ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
-        ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
-        ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['embedMedia', JSON.stringify(mediaData)]]);
+        const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
+        ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
+        ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
+        ace.ace_performDocumentApplyAttributesToRange(rep[0][0], rep[0][1], [['embedMedia', JSON.stringify(mediaData)]]);
       }, 'embedMedia');
     }
     img.onload = () => padeditor.ace.callWithAce((ace) => {
-      const rep = ace.ace_getRep();
-      ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
-      ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
-      ace.ace_performDocumentApplyAttributesToRange(rep.selStart, rep.selEnd, [['insertEmbedPicture', JSON.stringify(mediaData)]]);
+      const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
+      ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
+      ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
+      ace.ace_performDocumentApplyAttributesToRange(rep[0][0], rep[0][1], [['insertEmbedPicture', JSON.stringify(mediaData)]]);
     }, 'insertEmbedPicture');
 
     img.onerror = () => {

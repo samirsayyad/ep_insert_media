@@ -15,6 +15,20 @@ const cleanEmbedPictureCode = (orig, align, size) => {
   return `<img class='embedRemoteImage ep_insert_media_${align} ep_insert_media_${size}' src='${value}'>`;
 };
 
+const cleanEmbedSvgCode = (orig, align, size) => {
+  const value = $.trim(orig);
+  let height = '175';
+  if (size === 'Medium') {
+    height = '350';
+  }
+  if (size === 'Large') {
+    height = '540';
+  }
+  return `<object data='${value}' class='embedRemoteImage ep_insert_media_${align} ep_insert_media_${size}' type="image/svg+xml" id="alphasvg" width="${height}" height="${height}"></object>`;
+  // <img class='embedRemoteImage ep_insert_media_${align} ep_insert_media_${size}' src='${value}'>
+};
+
+
 const parseUrlParams = (url) => {
   const res = {};
   url.split('?')[1].split('&').map((item) => {
@@ -68,9 +82,15 @@ const insertEmbedAudio = (cls, mediaData) => {
   [{cls, extraOpenTags: `<samdiv data-url='${unescape(mediaData.url)}' id='emb_audio-${randomString(16)}' class='embedRemoteAudioSpan'><samdiv class='audio'>${cleanEmbedAudioCode(unescape(mediaData.url), mediaData)}</samdiv><samdiv class='character'>`, extraCloseTags: '</samdiv>'}];
 };
 
+const insertMediaLoading = (cls, mediaData) => [{cls,
+  extraOpenTags: `<samdiv data-size='${mediaData.size}' data-align='${mediaData.align
+  }' data-url='/static/plugins/ep_insert_media/static/images/loading.gif' id='media_loading' class='embedRemoteImageSpan'><samdiv class='image'>${cleanEmbedSvgCode('/static/plugins/ep_insert_media/static/images/spinner.svg', mediaData.align, mediaData.size)
+  }</samdiv><samdiv class='character'>`, extraCloseTags: '</samdiv>'}];
+
 module.exports = {
   embedMedia,
   insertEmbedPicture,
   insertEmbedVideo,
   insertEmbedAudio,
+  insertMediaLoading,
 };

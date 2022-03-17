@@ -4,6 +4,33 @@ const _ = require('ep_etherpad-lite/static/js/underscore');
 const copyPasteEvents = require('./copyPasteEvents');
 const hasMediaOnSelection = copyPasteEvents.hasMediaOnSelection;
 const mediaHandlers = require('./handlers/mediaHandlers');
+
+
+// Alas we follow the Etherpad convention of using tuples here.
+const getRepFromSelector = (selector, container) => {
+  const repArr = [];
+  // first find the element
+  const elements = container.contents().find(selector);
+  // One might expect this to be a rep for the entire document
+  // However what we actually need to do is find each selection that includes
+  // this link and remove it.  This is because content can be pasted
+  // Mid link which would mean a remove selection could have unexpected consequences
+
+  $.each(elements, (index, span) => {
+    // create a rep array container we can push to..
+    const rep = [[], []];
+
+    // span not be the div so we have to go to parents until we find a div
+    const parentDiv = $(span).closest('samdiv');
+    // line Number is obviously relative to entire document
+    const lineNumber = $(parentDiv).prevAll('samdiv').length;
+    rep[0][0] = lineNumber;
+    rep[1][0] = lineNumber;
+    repArr.push(rep);
+  });
+  return repArr;
+};
+
 exports.postAceInit = (hookName, context) => {
   const ace = context.ace;
   const browser = require('ep_etherpad-lite/static/js/browser');
@@ -53,6 +80,12 @@ exports.aceAttribsToClasses = (_hookName, args) => {
       data: args.value,
     })];
   }
+  if (args.key === 'insertMediaLoading' && args.value !== '') {
+    return ['ep_insert_media', JSON.stringify({
+      func: 'insertMediaLoading',
+      data: args.value,
+    })];
+  }
   return [];
 };
 
@@ -73,6 +106,8 @@ exports.aceCreateDomLine = (_hookName, args) => {
         return mediaHandlers.insertEmbedVideo(args.cls, data);
       case 'insertEmbedAudio':
         return mediaHandlers.insertEmbedAudio(args.cls, data);
+      case 'insertMediaLoading':
+        return mediaHandlers.insertMediaLoading(args.cls, data);
       default:
         return [];
     }
@@ -86,5 +121,7 @@ exports.aceInitialized = (hook, context) => {
   const editorInfo = context.editorInfo;
   // eslint-disable-next-line you-dont-need-lodash-underscore/bind
   editorInfo.ace_hasMediaOnSelection = _(hasMediaOnSelection).bind(context);
+  // eslint-disable-next-line you-dont-need-lodash-underscore/bind
+  editorInfo.ace_getRepFromSelector = _(getRepFromSelector).bind(context);
   return [];
 };
