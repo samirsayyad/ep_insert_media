@@ -12,7 +12,7 @@ const cleanEmbedVideoCode = (orig, mediaData) => {
 };
 const cleanEmbedPictureCode = (orig, align, size) => {
   const value = $.trim(orig);
-  return `<img class='embedRemoteImage ep_insert_media_${align} ep_insert_media_${size}' src='${value}'>`;
+  return `<img  loading='auto' class='embedRemoteImage ep_insert_media_${align} ep_insert_media_${size}' src='${value}'>`;
 };
 
 const cleanEmbedSvgCode = (orig, align, size) => {
@@ -24,7 +24,7 @@ const cleanEmbedSvgCode = (orig, align, size) => {
   if (size === 'Large') {
     height = '540';
   }
-  return `<object data='${value}' class='embedRemoteImage ep_insert_media_${align} ep_insert_media_${size}' type="image/svg+xml" id="alphasvg" width="${height}" height="${height}"></object>`;
+  return `<object  loading='lazy' data='${value}' class='embedRemoteImage ep_insert_media_${align} ep_insert_media_${size}' type="image/svg+xml" id="alphasvg" width="${height}" height="${height}"></object>`;
   // <img class='embedRemoteImage ep_insert_media_${align} ep_insert_media_${size}' src='${value}'>
 };
 
@@ -54,7 +54,7 @@ const cleanEmbedCode = (orig, mediaData) => {
       return `<iframe   class="video" src="http://player.vimeo.com/video${separatedUrl.pathname}?color=ffffff"
        frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>`;
     default:
-      return '<img src=\'/static/plugins/ep_insert_media/static/html/invalid.png\'>';
+      return '<img  loading=\'lazy\' src=\'/static/plugins/ep_insert_media/static/html/invalid.png\'>';
   }
 };
 
