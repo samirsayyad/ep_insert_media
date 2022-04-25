@@ -1,8 +1,5 @@
 'use strict';
 
-const $ = require('ep_etherpad-lite/static/js/rjquery').$;
-
-
 const isImage = (filename) => {
   switch (filename.toLowerCase()) {
     case '.jpg':
@@ -164,6 +161,15 @@ $(document).ready(() => {
       module.removeClass('insertEmbedMedia-show');
     }
   });
+
+	$('#mobileToolbar .embededMedia').on('touchstart', function (e) { 
+		const module = $('#embedMediaModal');
+    if (!module.hasClass('insertEmbedMedia-show')) {
+      module.addClass('insertEmbedMedia-show');
+    } else {
+      module.removeClass('insertEmbedMedia-show');
+    }
+	 });
 
   $('#doEmbedMedia').click(() => {
     const padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;

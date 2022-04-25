@@ -264,3 +264,11 @@ div.btnAlignDirection .alignIcon path{
 	content: "\e83a";
 	font-size: 16px;
 }
+
+/* mobile view*/
+body.mobileView #embedMediaModal{
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%)!important;
+	width: 95vw;
+}
