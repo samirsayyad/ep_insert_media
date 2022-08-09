@@ -3,9 +3,9 @@
   "description": "Embed media (youtube, vimeo etc)",
   "version": "0.0.3",
   "author": {
-		"name": "Samir Sayyad",
-		"email": "samir.saiad@gmail.com"
-	},
+    "name": "Samir Sayyad",
+    "email": "samir.saiad@gmail.com"
+  },
   "contributors": [],
   "dependencies": {
     "busboy": "^1.4.0",
@@ -14,23 +14,29 @@
     "minio": "^7.0.26",
     "path": "^0.12.7",
     "stream_upload": "^0.1.5",
+    "underscore": "^1.13.4",
     "url": "^0.11.0",
     "uuid": "^8.3.2"
   },
   "scripts": {
     "lint:fix": "eslint --fix .;",
-    "lint:dry": "eslint --fix-dry-run ."
+    "lint:dry": "eslint --fix-dry-run .",
+    "rollup:build": "rollup -c rollup.config.js",
+    "rollup:watch": "rollup -c rollup.config.js --watch"
+
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/samirsayyad/ep_insert_media.git"
   },
-  "engines": {
-    "node": "*"
-  },
   "devDependencies": {
+    "@babel/preset-env": "^7.18.10",
+    "@rollup/plugin-babel": "^5.3.1",
+    "@rollup/plugin-commonjs": "^22.0.2",
+    "@rollup/plugin-node-resolve": "^13.3.0",
     "eslint": "^8.10.0",
     "eslint-config-etherpad": "^3.0.4",
+    "rollup-plugin-terser": "^7.0.2",
     "typescript": "^4.6.2"
   }
 }

@@ -6,20 +6,19 @@
       "post": ["ep_etherpad-lite/static"],
       "hooks": {
         "eejsBlock_editbarMenuLeft": "ep_insert_media/server/hooks:eejsBlock_editbarMenuLeft",
-        "eejsBlock_scripts": "ep_insert_media/server/hooks:eejsBlock_scripts",
         "eejsBlock_styles": "ep_insert_media/server/hooks:eejsBlock_styles",
         "eejsBlock_body": "ep_insert_media/server/hooks:eejsBlock_body",
         "expressConfigure": "ep_insert_media/server/hooks:expressConfigure",
 				"clientVars": "ep_insert_media/server/hooks:clientVars"
-
       },
       "client_hooks": {
-        "aceInitInnerdocbodyHead": "ep_insert_media/static/js/hooks:aceInitInnerdocbodyHead",
-        "aceAttribsToClasses": "ep_insert_media/static/js/hooks:aceAttribsToClasses",
-        "aceCreateDomLine": "ep_insert_media/static/js/hooks:aceCreateDomLine",
-        "aceInitialized" : "ep_insert_media/static/js/hooks:aceInitialized",
-        "postAceInit":"ep_insert_media/static/js/hooks:postAceInit",
-        "collectContentPre" : "ep_insert_media/static/js/collectContentPre"
+        "aceInitInnerdocbodyHead": "ep_insert_media/static/dist/ep_insert_media_bundle",
+        "documentReady": "ep_insert_media/static/dist/ep_insert_media_bundle",
+        "aceAttribsToClasses": "ep_insert_media/static/dist/ep_insert_media_bundle",
+        "aceCreateDomLine": "ep_insert_media/static/dist/ep_insert_media_bundle",
+        "aceInitialized" : "ep_insert_media/static/dist/ep_insert_media_bundle",
+        "postAceInit":"ep_insert_media/static/dist/ep_insert_media_bundle",
+        "collectContentPre" : "ep_insert_media/static/dist/ep_insert_media_bundle"
       }
     }
   ]

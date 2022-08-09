@@ -1,5 +1,3 @@
-'use strict';
-
 const StreamUpload = require('stream_upload');
 const url = require('url');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
@@ -37,9 +35,14 @@ const localUploadMedia = async (file, mimetype, savedFilename, fileType, busboy,
       baseURL += '/';
     }
     const accessPath = url.resolve(settings.ep_insert_media.localStorage.baseURL, savedFilename);
-    const finalSavedFilename = path.join(settings.ep_insert_media.localStorage.baseFolder, savedFilename);
-    const uploadResult = await imageUpload.upload(file, {type: mimetype, filename: finalSavedFilename});
-    if (uploadResult) { return {type: 'localStorage', error: false, fileName: accessPath, fileType}; } else { return null; }
+    const baseFolder = settings.ep_insert_media.localStorage.baseFolder;
+    const finalSavedFilename = path.join(baseFolder, savedFilename);
+    const uploadOption = {type: mimetype, filename: finalSavedFilename};
+    const uploadResult = await imageUpload.upload(file, uploadOption);
+    if (uploadResult) {
+      return {type: 'localStorage', error: false, fileName: accessPath, fileType};
+    }
+    return null;
   } catch (e) {
     console.error(e);
   }

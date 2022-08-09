@@ -1,6 +1,4 @@
-'use strict';
-
-exports.isImage = (filename) => {
+export const isImage = (filename) => {
   switch (filename.toLowerCase()) {
     case '.jpg':
     case '.gif':
@@ -12,7 +10,7 @@ exports.isImage = (filename) => {
   return false;
 };
 
-exports.isVideo = (filename) => {
+export const isVideo = (filename) => {
   switch (filename.toLowerCase()) {
     case '.m4v':
     case '.avi':

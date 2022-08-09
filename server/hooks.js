@@ -1,5 +1,3 @@
-'use strict';
-
 const eejs = require('ep_etherpad-lite/node/eejs');
 const busboy = require('busboy');
 const path = require('path');
@@ -25,10 +23,6 @@ exports.eejsBlock_body = (_hookName, args) => {
   return [];
 };
 
-exports.eejsBlock_scripts = (_hookName, args) => {
-  args.content += eejs.require('ep_insert_media/templates/scripts.ejs', {}, module);
-  return [];
-};
 
 exports.eejsBlock_styles = (_hookName, args) => {
   args.content += eejs.require('ep_insert_media/templates/styles.ejs', {}, module);
@@ -46,7 +40,10 @@ exports.expressConfigure = (_hookName, context) => {
       signatureVersion: 'v4',
     });
     try {
-      const params = {Bucket: settings.ep_insert_media.s3Storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`};
+      const params = {
+        Bucket: settings.ep_insert_media.s3Storage.bucket,
+        Key: `${req.params.padId}/${req.params.mediaId}`,
+      };
       s3.getObject(params, (err, data) => {
         if (data) {
           res.writeHead(200, {'Content-Type': 'image/jpeg'});
@@ -72,7 +69,10 @@ exports.expressConfigure = (_hookName, context) => {
       signatureVersion: 'v4',
     });
     try {
-      const params = {Bucket: settings.ep_insert_media.s3Storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`};
+      const params = {
+        Bucket: settings.ep_insert_media.s3Storage.bucket,
+        Key: `${req.params.padId}/${req.params.mediaId}`,
+      };
       s3.getObject(params, (err, data) => {
         if (data) {
           res.writeHead(200, {'Content-Type': 'video/mp4'});
@@ -99,7 +99,10 @@ exports.expressConfigure = (_hookName, context) => {
       signatureVersion: 'v4',
     });
     try {
-      const params = {Bucket: settings.ep_insert_media.s3Storage.bucket, Key: `${req.params.padId}/${req.params.mediaId}`};
+      const params = {
+        Bucket: settings.ep_insert_media.s3Storage.bucket,
+        Key: `${req.params.padId}/${req.params.mediaId}`,
+      };
       s3.getObject(params, (err, data) => {
         if (data) {
           res.writeHead(200, {'Content-Type': mime.lookup(req.params.mediaId)});
@@ -145,10 +148,14 @@ exports.expressConfigure = (_hookName, context) => {
         fileHandlers.s3UploadMedia(file, savedFilename, fileType, (err, data) => {
           if (err) console.error(err, err.stack, 'error');
           if (data) {
-            res.status(201).json({type: 's3', error: false, fileName: savedFilename, fileType, data});
+            res.status(201).json({
+              type: 's3', error: false, fileName: savedFilename, fileType, data,
+            });
             res.end();
           } else {
-            res.status(400).json({type: 's3', error: true, fileName: savedFilename, fileType, data});
+            res.status(400).json({
+              type: 's3', error: true, fileName: savedFilename, fileType, data,
+            });
             res.end();
           }
         });

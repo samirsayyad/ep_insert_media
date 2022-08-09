@@ -2,11 +2,12 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import babel from '@rollup/plugin-babel';
 import {terser} from 'rollup-plugin-terser';
+import {name} from './package-lock.json'
 
 export default {
   input: './static/js/index.js',
   output: {
-    file: './static/dist/bundle.js',
+    file: `./static/dist/${name}_bundle.js`,
     format: 'cjs',
     sourcemap: true,
     strict: true,

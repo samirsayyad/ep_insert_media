@@ -1,13 +1,11 @@
-'use strict';
+import * as _ from 'underscore';
 
-const _ = require('ep_etherpad-lite/static/js/underscore');
 const createHiddenDiv = (range) => {
   const content = range.cloneContents();
   const div = document.createElement('div');
   const hiddenDiv = $(div).html(content);
   return hiddenDiv;
 };
-
 
 const getLength = (line, rep) => {
   const nextLine = line + 1;
@@ -19,7 +17,6 @@ const getLength = (line, rep) => {
 
   return lineLength;
 };
-
 
 const getFirstColumnOfSelection =
   (line, rep, firstLineOfSelection) => line !== firstLineOfSelection ? 0 : rep.selStart[1];
@@ -39,18 +36,29 @@ const hasMediaOnLine = (lineNumber, firstColumn, lastColumn, attributeManager) =
   for (let column = firstColumn; column <= lastColumn && !foundMediaOnLine; column++) {
     // copy process should add new type if added also for pasted
     // real elements that comes from upload modal
+
     const embedMedia = _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).embedMedia;
     const insertEmbedPicture = _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).insertEmbedPicture;
     const insertEmbedVideo = _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).insertEmbedVideo;
     const insertEmbedAudio = _.object(attributeManager.getAttributesOnPosition(lineNumber, column)).insertEmbedAudio;
-    if (embedMedia !== undefined) foundMediaOnLine = {elemenet: 'embedMedia', data: embedMedia};
-    if (insertEmbedPicture !== undefined) foundMediaOnLine = {elemenet: 'insertEmbedPicture', data: insertEmbedPicture};
-    if (insertEmbedVideo !== undefined) foundMediaOnLine = {elemenet: 'insertEmbedVideo', data: insertEmbedVideo};
-    if (insertEmbedAudio !== undefined) foundMediaOnLine = {elemenet: 'insertEmbedAudio', data: insertEmbedAudio};
+
+    console.info(embedMedia, attributeManager.getAttributesOnPosition(lineNumber, column));
+
+    if (embedMedia !== undefined) {
+      foundMediaOnLine = {elemenet: 'embedMedia', data: embedMedia};
+    }
+    if (insertEmbedPicture !== undefined) {
+      foundMediaOnLine = {elemenet: 'insertEmbedPicture', data: insertEmbedPicture};
+    }
+    if (insertEmbedVideo !== undefined) {
+      foundMediaOnLine = {elemenet: 'insertEmbedVideo', data: insertEmbedVideo};
+    }
+    if (insertEmbedAudio !== undefined) {
+      foundMediaOnLine = {elemenet: 'insertEmbedAudio', data: insertEmbedAudio};
+    }
   }
   return foundMediaOnLine;
 };
-
 
 const hasMediaOnMultipleLineSel = (selFirstLine, selLastLine, rep, attributeManager) => {
   let foundLineWithMedia = {};
@@ -68,12 +76,10 @@ const hasMediaOnMultipleLineSel = (selFirstLine, selLastLine, rep, attributeMana
   return foundLineWithMedia;
 };
 
-
 const hasMultipleLineSelected =
   (firstLineOfSelection, lastLineOfSelection) => firstLineOfSelection !== lastLineOfSelection;
 
-
-exports.hasMediaOnSelection = function () {
+export const hasMediaOnSelection = function () {
   let hasMedia;
   const attributeManager = this.documentAttributeManager;
   const rep = this.rep;
@@ -90,8 +96,8 @@ exports.hasMediaOnSelection = function () {
   return hasMedia;
 };
 
-
 const getHtml = (hiddenDiv) => $(hiddenDiv).html();
+
 const buildHtmlWithTwoSpanTags = (text) => {
   // text until before last char
   const firstSpan = `<span class="media">${text.slice(0, -1)}</span>`;
@@ -115,6 +121,7 @@ const buildCloseTags = (tags) => {
   }
   return closeTags;
 };
+
 const getTagsInSelection = (htmlObject) => {
   const tags = [];
   let tag;
@@ -127,7 +134,6 @@ const getTagsInSelection = (htmlObject) => {
   }
   return tags;
 };
-
 
 const buildHtmlWithFormattingTagsOfSelection = (html, range) => {
   const htmlOfParentNode = range.commonAncestorContainer.parentNode;
@@ -142,7 +148,6 @@ const buildHtmlWithFormattingTagsOfSelection = (html, range) => {
 
   return html;
 };
-
 
 const buildHtmlToCopyWhenSelectionHasOnlyText = (text, range) => {
   const htmlWithSpans = buildHtmlWithTwoSpanTags(text);
@@ -166,7 +171,8 @@ const selectionHasOnlyText = (rawHtml) => {
   const text = $(rawHtml).text();
   return htmlDecoded === text;
 };
-exports.pasteMedia = (e, ace, padInner) => {
+
+export const pasteMedia = (e, ace, padInner) => {
   const objectMediaDataHtml = e.originalEvent.clipboardData.getData('text/objectMediaDataHtml');
   let objectMediaData = e.originalEvent.clipboardData.getData('text/objectMediaData');
   if (objectMediaDataHtml && objectMediaData) {
@@ -224,7 +230,7 @@ exports.pasteMedia = (e, ace, padInner) => {
   }
 };
 
-exports.addTextOnClipboard = (e, ace, padInner) => {
+export const addTextOnClipboard = (e, ace, padInner) => {
   let hasMediaOnSelection;
   ace.callWithAce((ace) => {
     hasMediaOnSelection = ace.ace_hasMediaOnSelection();
