@@ -4,20 +4,17 @@
 require('eslint-config-etherpad/patch/modern-module-resolution');
 
 module.exports = {
+  root: true,
+  extends: 'etherpad/plugin',
   env: {
-    es6: true,
     browser: true,
     node: true,
+    commonjs: true,
+    es6: true,
     jquery: true,
-    mocha: true,
   },
-  root: true,
-  extends: 'etherpad',
-  rules: {
-    'max-len': 0,
-  },
-  globals: {
-    clientVars: true,
-    pad: true,
+  parserOptions: {
+    ecmaVersion: 2020,
+    sourceType: 'module',
   },
 };

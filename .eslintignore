@@ -1,0 +1,2 @@
+static/dist/**/*.js
+rollup.config.js

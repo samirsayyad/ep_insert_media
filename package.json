@@ -21,20 +21,6 @@
     "lint:fix": "eslint --fix .;",
     "lint:dry": "eslint --fix-dry-run ."
   },
-  "eslintConfig": {
-    "root": true,
-    "extends": "etherpad/plugin",
-    "ignorePatterns": [],
-    "globals": {
-      "$": true,
-			"documentReady": true,
-			"pad": true,
-			"it":true,
-			"describe":true,
-			"before":true,
-			"process":true
-    }
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/samirsayyad/ep_insert_media.git"
