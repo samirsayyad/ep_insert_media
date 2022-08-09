@@ -1,7 +1,7 @@
 {
   "name": "ep_insert_media",
   "description": "Embed media (youtube, vimeo etc)",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "author": {
     "name": "Samir Sayyad",
     "email": "samir.saiad@gmail.com"
