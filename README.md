@@ -13,6 +13,7 @@ or Use the Etherpad ``/admin`` interface.
 
 ## Settings
     "ep_insert_media":{
+      "persistToLocal": false
       "storage":{
         "endPoint" : "${BUCKET_S3_SERVER:null}",// need for s3 upload
         "useSSL" : true ,// need for s3 upload

@@ -3,6 +3,29 @@ import * as mediaHandlers from 'ep_insert_media/static/js/handlers/mediaHandlers
 
 const hasMediaOnSelection = copyPasteEvents.hasMediaOnSelection;
 
+const displayError = (message) => {
+  $.gritter.add({
+    title: 'Error',
+    text: message,
+    // eslint-disable-next-line camelcase
+    class_name: 'error',
+  });
+};
+
+const aceInserMediaToPad = (action, mediaData) => {
+  const padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
+  padeditor.ace.callWithAce((ace) => {
+    const rep = ace.ace_getRep();
+    ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
+    console.log(rep.selStart, rep.selEnd);
+    ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
+    ace.ace_performDocumentApplyAttributesToRange(
+        rep.selStart, rep.selEnd,
+        [[action, JSON.stringify(mediaData)]]
+    );
+  }, action);
+};
+
 // Alas we follow the Etherpad convention of using tuples here.
 const getRepFromSelector = (selector, container) => {
   const repArr = [];
@@ -114,13 +137,6 @@ export const aceCreateDomLine = (hookName, args) => {
   }
 };
 
-export const aceInitialized = (hookName, context) => {
-  const editorInfo = context.editorInfo;
-  editorInfo.ace_hasMediaOnSelection = hasMediaOnSelection.bind(context);
-  editorInfo.ace_getRepFromSelector = getRepFromSelector.bind(context);
-  return [];
-};
-
 export const collectContentPre = (hookName, context) => {
   /* eslint-disable max-len */
   // insertEmbedPicture =======  emb_img
@@ -151,69 +167,13 @@ export const collectContentPre = (hookName, context) => {
 };
 
 export const documentReady = (hookName, context) => {
-  const isImage = (filename) => {
-    switch (filename.toLowerCase()) {
-      case '.jpg':
-      case '.gif':
-      case '.bmp':
-      case '.png':
-      case '.jpeg':
-
-        // etc
-        return true;
-    }
-    return false;
-  };
-
-  const isVideo = (filename) => {
-    switch (filename.toLowerCase()) {
-      case '.m4v':
-      case '.avi':
-      case '.mpg':
-      case '.mp4':
-      case '.webm':
-
-        // etc
-        return true;
-    }
-    return false;
-  };
-
-  const isAudio = (filename) => {
-    switch (filename.toLowerCase()) {
-      case '.mp3':
-      case '.ogg':
-      case '.m4a':
-      case '.flac':
-      case '.wav':
-      case '.wma':
-      case '.aac':
-
-        // etc
-        return true;
-    }
-    return false;
-  };
-
-  const showLoading = (mediaData) => {
-    const padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
-    padeditor.ace.callWithAce((ace) => {
-      const rep = ace.ace_getRep();
-      ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
-      ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
-      ace.ace_performDocumentApplyAttributesToRange(
-          rep.selStart, rep.selEnd,
-          [['insertMediaLoading', JSON.stringify(mediaData)]]
-      );
-    }, 'insertMediaLoading');
-  };
+  const showLoading = (mediaData) => aceInserMediaToPad('insertMediaLoading', mediaData);
 
   const uploadAction = (mediaData) => {
-    const padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
-
     const fd = new FormData();
     const files = $('#file')[0].files[0];
-    fd.append('file', files);
+    fd.append('mediaFile', files);
+    console.log(mediaData, fd);
     $.ajax({
       url: `/p/${clientVars.padId}/pluginfw/ep_insert_media/upload`,
       type: 'post',
@@ -228,70 +188,30 @@ export const documentReady = (hookName, context) => {
         alert(thrownError);
       },
       success: (response) => {
-        const padOuter = $('iframe[name="ace_outer"]').contents();
-        const padInner = padOuter.find('iframe[name="ace_inner"]');
-
-        if (response && response.error === false) {
-          if (isImage(response.fileType)) {
-            let imageUrl;
-            if (response.type === 's3') imageUrl = `/p/getImage/${response.fileName}`;
-            else imageUrl = response.fileName;
-            mediaData.url = escape(imageUrl);
-            padeditor.ace.callWithAce((ace) => {
-              const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
-              if (!rep.length) return;
-              ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
-              ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
-              ace.ace_performDocumentApplyAttributesToRange(
-                  rep[0][0], rep[0][1],
-                  [['insertEmbedPicture', JSON.stringify(mediaData)]]
-              );
-            }, 'insertEmbedPicture');
-          } if (isVideo(response.fileType)) {
-            let videoUrl;
-            if (response.type === 's3') videoUrl = `/p/getVideo/${response.fileName}`;
-            else videoUrl = response.fileName;
-            mediaData.url = escape(videoUrl);
-
-            padeditor.ace.callWithAce((ace) => {
-              const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
-              if (!rep.length) return;
-              ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
-              ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
-              ace.ace_performDocumentApplyAttributesToRange(
-                  rep[0][0], rep[0][1],
-                  [['insertEmbedVideo', JSON.stringify(mediaData)]]
-              );
-            }, 'insertEmbedVideo');
-          } if (isAudio(response.fileType)) {
-            let audioUrl;
-            if (response.type === 's3') audioUrl = `/p/getMedia/${response.fileName}`;
-            else audioUrl = response.fileName;
-            mediaData.url = escape(audioUrl);
-
-            padeditor.ace.callWithAce((ace) => {
-              const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
-              if (!rep.length) return;
-              ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
-              ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
-              ace.ace_performDocumentApplyAttributesToRange(
-                  rep[0][0], rep[0][1],
-                  [['insertEmbedAudio', JSON.stringify(mediaData)]]
-              );
-            }, 'insertEmbedAudio');
-          }
-
-
-          $('#embedMediaModal').removeClass('insertEmbedMedia-show');
-          $('#file').val('');
-        } else {
-          $.gritter.add({
-            title: 'Error',
-            text: `ep_insert_media: ${response.error}`,
-            sticky: true,
-            className: 'error',
-          });
+        console.log(response);
+        const {type, fileType, error} = response;
+        if (response && error === false) {
+          return displayError(`ep_insert_media: ${error}`);
         }
+
+        let mediaURI = `/pluginfw/ep_insert_media/media/${response.fileName}'`;
+
+        if (fileType === 'image') {
+          if (type === 's3') mediaURI = `/p/getImage/${response.fileName}`;
+          mediaData.url = encodeURI(mediaURI);
+          aceInserMediaToPad('insertEmbedPicture', mediaData);
+        } if (fileType === 'video') {
+          if (type === 's3') mediaURI = `/p/getVideo/${response.fileName}`;
+          mediaData.url = encodeURI(mediaURI);
+          aceInserMediaToPad('insertEmbedVideo', mediaData);
+        } if (fileType === 'audio') {
+          if (type === 's3') mediaURI = `/p/getMedia/${response.fileName}`;
+          mediaData.url = encodeURI(mediaURI);
+          aceInserMediaToPad('insertEmbedAudio', mediaData);
+        }
+        // reset form
+        $('#embedMediaModal').removeClass('insertEmbedMedia-show');
+        $('#file').val('');
       },
     });
   };
@@ -308,107 +228,72 @@ export const documentReady = (hookName, context) => {
     $('#selectedAlign').val($(this).data('value'));
   });
 
-  $('#file').change(() => {
-    $('#embedMediaSrc').val('');
-  });
+  $('#file').change(() => $('#embedMediaSrc').val(''));
 
   $('#insertEmbedMedia').click(() => {
     // Can not use this yet, fix in main etherpad
     // padeditbar.toogleDropDown("embedMediaModal");
     const module = $('#embedMediaModal');
     if (!module.hasClass('insertEmbedMedia-show')) {
-      module.addClass('insertEmbedMedia-show');
-    } else {
-      module.removeClass('insertEmbedMedia-show');
+      return module.addClass('insertEmbedMedia-show');
     }
+    return module.removeClass('insertEmbedMedia-show');
   });
 
-  $('#mobileToolbar .embededMedia').on('touchstart', (e) => {
+  $('#mobileToolbar .embededMedia').on('touchstart', () => {
     const module = $('#embedMediaModal');
     if (!module.hasClass('insertEmbedMedia-show')) {
-      module.addClass('insertEmbedMedia-show');
-    } else {
-      module.removeClass('insertEmbedMedia-show');
+      return module.addClass('insertEmbedMedia-show');
     }
+    return module.removeClass('insertEmbedMedia-show');
   });
 
   $('#doEmbedMedia').click(() => {
-    const padeditor = require('ep_etherpad-lite/static/js/pad_editor').padeditor;
-    const url = $('#embedMediaSrc')[0].value;
+    const url = $('input[type="text"]#embedMediaSrc').val();
     const imageSize = $('#selectedSize').val();
     const imageAlign = $('#selectedAlign').val();
-    const imageUrl = escape(url);
+    const imageUrl = encodeURI(url);
+
     const mediaData = {
       url: imageUrl,
       align: imageAlign,
       size: imageSize,
     };
+
+    // close the modal
     $('#embedMediaModal').removeClass('insertEmbedMedia-show');
 
-    if ((url === '')) {
+    if (url === '') {
       const files = $('#file')[0].files[0];
       if (!files) {
-        $.gritter.add({
-          title: 'Error',
-          text: 'You didn\'t select or enter any media.',
-          class_name: 'error',
-        });
-        return;
+        return displayError('You didn\'t select or enter any media.');
       }
       if (files.size > clientVars.ep_insert_media.settings.maxFileSize) {
-        $.gritter.add({
-          title: 'Error',
-          text: 'Maximum file size exceeded. (50 MB Limit)',
-          class_name: 'error',
-        });
+        displayError('Maximum file size exceeded. (50 MB Limit)');
         $('#file').val(null);
         return;
       }
-      uploadAction(mediaData);
-      return;
+      return uploadAction(mediaData);
     }
-
-    const padOuter = $('iframe[name="ace_outer"]').contents();
-    const padInner = padOuter.find('iframe[name="ace_inner"]');
 
     showLoading(mediaData);
     const separatedUrl = new URL(url);
     const img = new Image();
+
     if (!['http:', 'https:'].includes(separatedUrl.protocol)) return;
     $('#embedMediaSrc').val('');
     if (['www.youtube.com', 'youtu.be', 'vimeo.com'].includes(separatedUrl.host)) {
-      return padeditor.ace.callWithAce((ace) => {
-        const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
-        if (!rep.length) return;
-        ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
-        ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
-        ace.ace_performDocumentApplyAttributesToRange(
-            rep[0][0], rep[0][1],
-            [['embedMedia', JSON.stringify(mediaData)]]
-        );
-      }, 'embedMedia');
+      return aceInserMediaToPad('embedMedia', mediaData);
     }
-    img.onload = () => padeditor.ace.callWithAce((ace) => {
-      const rep = ace.ace_getRepFromSelector('#media_loading', padInner); // ace.ace_getRep();
-      if (!rep.length) return;
-      ace.ace_replaceRange(rep[0][0], rep[0][1], 'E');
-      ace.ace_performSelectionChange([rep[0][0][0], rep[0][0][1] - 1], rep[0][0], false);
-      ace.ace_performDocumentApplyAttributesToRange(
-          rep[0][0], rep[0][1],
-          [['insertEmbedPicture', JSON.stringify(mediaData)]]
-      );
-    }, 'insertEmbedPicture');
+
+    img.onload = () => aceInserMediaToPad('insertEmbedPicture', mediaData);
 
     img.onerror = () => {
       if (!$('#editorcontainerbox').hasClass('flex-layout')) {
-        $.gritter.add({
-          title: 'Error',
-          text: 'ep_insert_media: image is not supported.',
-          sticky: true,
-          className: 'error',
-        });
+        displayError('ep_insert_media: image is not supported.');
       }
     };
+
     img.src = url;
   });
 
@@ -416,4 +301,11 @@ export const documentReady = (hookName, context) => {
     // $("#embedMediaModal").slideUp("fast");
     $('#embedMediaModal').removeClass('insertEmbedMedia-show');
   });
+};
+
+export const aceInitialized = (hookName, context) => {
+  const editorInfo = context.editorInfo;
+  editorInfo.ace_hasMediaOnSelection = hasMediaOnSelection.bind(context);
+  editorInfo.ace_getRepFromSelector = getRepFromSelector.bind(context);
+  return [];
 };

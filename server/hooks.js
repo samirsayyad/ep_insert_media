@@ -6,6 +6,7 @@ const AWS = require('aws-sdk');
 const mime = require('mime-types');
 const fileHandlers = require('./handlers/fileHandlers');
 const uuid = require('uuid');
+const fileUpload = require('express-fileupload');
 
 exports.clientVars = (hook, context, callback) => ({
   ep_insert_media: {
@@ -31,17 +32,30 @@ exports.eejsBlock_styles = (_hookName, args) => {
 
 
 exports.expressConfigure = (_hookName, context) => {
+  const {maxFileSize, s3Storage} = settings.ep_insert_media;
+
+  const TWO_MEG = 2 * 1024 * 1024;
+  const MAX_UPLOAD_SIZE = maxFileSize || TWO_MEG;
+
+  context.app.use(fileUpload({
+    createParentPath: true,
+    limits: {fileSize: MAX_UPLOAD_SIZE},
+    useTempFiles: true,
+    tempFileDir: './temp/ep_insert_media',
+    parseNested: true,
+  }));
+
   context.app.get('/p/getImage/:padId/:mediaId', (req, res) => {
     const s3 = new AWS.S3({
-      accessKeyId: settings.ep_insert_media.s3Storage.accessKeyId,
-      secretAccessKey: settings.ep_insert_media.s3Storage.secretAccessKey,
-      endpoint: settings.ep_insert_media.s3Storage.endPoint,
+      accessKeyId: s3Storage.accessKeyId,
+      secretAccessKey: s3Storage.secretAccessKey,
+      endpoint: s3Storage.endPoint,
       s3ForcePathStyle: true, // needed with minio?
       signatureVersion: 'v4',
     });
     try {
       const params = {
-        Bucket: settings.ep_insert_media.s3Storage.bucket,
+        Bucket: s3Storage.bucket,
         Key: `${req.params.padId}/${req.params.mediaId}`,
       };
       s3.getObject(params, (err, data) => {
@@ -62,15 +76,15 @@ exports.expressConfigure = (_hookName, context) => {
 
   context.app.get('/p/getVideo/:padId/:mediaId', (req, res) => {
     const s3 = new AWS.S3({
-      accessKeyId: settings.ep_insert_media.s3Storage.accessKeyId,
-      secretAccessKey: settings.ep_insert_media.s3Storage.secretAccessKey,
-      endpoint: settings.ep_insert_media.s3Storage.endPoint,
+      accessKeyId: s3Storage.accessKeyId,
+      secretAccessKey: s3Storage.secretAccessKey,
+      endpoint: s3Storage.endPoint,
       s3ForcePathStyle: true, // needed with minio?
       signatureVersion: 'v4',
     });
     try {
       const params = {
-        Bucket: settings.ep_insert_media.s3Storage.bucket,
+        Bucket: s3Storage.bucket,
         Key: `${req.params.padId}/${req.params.mediaId}`,
       };
       s3.getObject(params, (err, data) => {
@@ -89,18 +103,17 @@ exports.expressConfigure = (_hookName, context) => {
     }
   });
 
-
   context.app.get('/p/getMedia/:padId/:mediaId', (req, res) => {
     const s3 = new AWS.S3({
-      accessKeyId: settings.ep_insert_media.s3Storage.accessKeyId,
-      secretAccessKey: settings.ep_insert_media.s3Storage.secretAccessKey,
-      endpoint: settings.ep_insert_media.s3Storage.endPoint,
+      accessKeyId: s3Storage.accessKeyId,
+      secretAccessKey: s3Storage.secretAccessKey,
+      endpoint: s3Storage.endPoint,
       s3ForcePathStyle: true, // needed with minio?
       signatureVersion: 'v4',
     });
     try {
       const params = {
-        Bucket: settings.ep_insert_media.s3Storage.bucket,
+        Bucket: s3Storage.bucket,
         Key: `${req.params.padId}/${req.params.mediaId}`,
       };
       s3.getObject(params, (err, data) => {
@@ -119,53 +132,48 @@ exports.expressConfigure = (_hookName, context) => {
     }
   });
 
-  context.app.post('/p/:padId/pluginfw/ep_insert_media/upload', (req, res, next) => {
+  context.app.get('/pluginfw/ep_insert_media/media/:address', async (req, res, next) => {
+    const {address} = req.params;
+    res.sendFile(path.join(process.cwd(), `./temp/ep_insert_media/${address}`));
+  });
+
+  context.app.post('/p/:padId/pluginfw/ep_insert_media/upload', async (req, res, next) => {
     const padId = req.params.padId;
     const storageConfig = settings.ep_insert_media;
+    const files = req.files;
+    const mediaFile = files?.mediaFile;
+    const canPersist2Local = storageConfig.persistToLocal || false;
+
     if (!storageConfig) return;
+    if (!mediaFile) return res.status(400).send('No files were uploaded.');
 
-    const bb = busboy({headers: req.headers, limits: {
-      fileSize: settings.ep_insert_media.maxFileSize,
-    }});
-
-    let uploadResult;
-    let finished;
-
-    bb.on('file', async (name, file, info) => {
-      const {filename, mimeType} = info;
+    // if "persistToLocal" set true, save the media to current directory
+    if (canPersist2Local) {
+      const uploadResult = await fileHandlers.localUploadMedia(mediaFile);
+      res.status(201).json(uploadResult);
+      return res.end();
+    }
+    // if s3 storage config available
+    if (s3Storage) {
       const newFileName = uuid.v4();
-      const fileType = path.extname(filename);
+      const fileType = path.extname(mediaFile.name);
       const savedFilename = path.join(padId, newFileName + fileType);
+      const {err, data} = await fileHandlers.s3UploadMedia(mediaFile.data, savedFilename, fileType);
 
-      if (settings.ep_insert_media.localStorage) {
-        uploadResult = await fileHandlers.localUploadMedia(file, mimeType, savedFilename, fileType);
-        if (finished) {
-          res.status(201).json(uploadResult);
-          res.end();
-        }
-      }
-      if (settings.ep_insert_media.s3Storage) {
-        fileHandlers.s3UploadMedia(file, savedFilename, fileType, (err, data) => {
-          if (err) console.error(err, err.stack, 'error');
-          if (data) {
-            res.status(201).json({
-              type: 's3', error: false, fileName: savedFilename, fileType, data,
-            });
-            res.end();
-          } else {
-            res.status(400).json({
-              type: 's3', error: true, fileName: savedFilename, fileType, data,
-            });
-            res.end();
-          }
+      if (err) console.error(err, err.stack, 'error');
+
+      if (!data) {
+        res.status(400).json({
+          type: 's3', error: true, fileName: savedFilename, fileType, data,
         });
+        return res.end();
       }
-    });
 
-    bb.on('close', () => {
-      finished = true; // related to localStorage
-    });
-
-    return req.pipe(bb);
+      res.status(201).json({
+        type: 's3', error: false, fileName: savedFilename, fileType, data,
+      });
+      return res.end();
+    }
+    return req.send(true);
   });
 };

@@ -1,51 +1,50 @@
-const StreamUpload = require('stream_upload');
-const url = require('url');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 const AWS = require('aws-sdk');
-const path = require('path');
+const {extractFileType} = require('../fileType');
 
-const s3UploadMedia = async (file, savedFilename, fileType, callback) => {
+
+const mime = require('mime');
+
+const s3UploadMedia = (file, savedFilename, callback) => new Promise((resolve, reject) => {
+  const {
+    accessKeyId,
+    secretAccessKey,
+    endPoint,
+    bucket,
+  } = settings.ep_insert_media.s3Storage;
+
   const s3 = new AWS.S3({
-    accessKeyId: settings.ep_insert_media.s3Storage.accessKeyId,
-    secretAccessKey: settings.ep_insert_media.s3Storage.secretAccessKey,
-    endpoint: settings.ep_insert_media.s3Storage.endPoint,
+    accessKeyId,
+    secretAccessKey,
+    endpoint: endPoint,
     s3ForcePathStyle: true, // needed with minio?
     signatureVersion: 'v4',
   });
   const paramsUpload = {
-    bucket: settings.ep_insert_media.s3Storage.bucket,
-    Bucket: settings.ep_insert_media.s3Storage.bucket,
+    bucket,
+    Bucket: bucket,
     Key: savedFilename, // File name you want to save as in S3
     Body: file,
   };
-  s3.upload(paramsUpload, callback);
-};
+  s3.upload(paramsUpload, resolve);
+});
 
-const localUploadMedia = async (file, mimetype, savedFilename, fileType, busboy, done) => {
+// use this function just for development pepose
+const localUploadMedia = async (file) => {
   try {
-    const imageUpload = new StreamUpload({
-      extensions: settings.ep_insert_media.fileTypes,
-      maxSize: settings.ep_insert_media.maxFileSize,
-      baseFolder: settings.ep_insert_media.localStorage.baseFolder,
-      storage: settings.ep_insert_media.localStorage,
-    });
-
-    let baseURL = settings.ep_insert_media.localStorage.baseURL;
-    if (baseURL.charAt(baseURL.length - 1) !== '/') {
-      baseURL += '/';
-    }
-    const accessPath = url.resolve(settings.ep_insert_media.localStorage.baseURL, savedFilename);
-    const baseFolder = settings.ep_insert_media.localStorage.baseFolder;
-    const finalSavedFilename = path.join(baseFolder, savedFilename);
-    const uploadOption = {type: mimetype, filename: finalSavedFilename};
-    const uploadResult = await imageUpload.upload(file, uploadOption);
-    if (uploadResult) {
-      return {type: 'localStorage', error: false, fileName: accessPath, fileType};
-    }
-    return null;
+    const format = mime.getExtension(file.mimetype);
+    const path = `${file.tempFilePath}.${format}`;
+    const fileType = extractFileType(format);
+    // save file
+    await file.mv(path);
+    const result = {type: 'localStorage', error: false, fileName: path.split('/').pop(), fileType};
+    return result;
   } catch (e) {
-    console.error(e);
+    console.error('[ep_insert_media]: localUploadMedia', e);
   }
 };
-module.exports = {localUploadMedia,
-  s3UploadMedia};
+module.exports = {
+  localUploadMedia,
+  s3UploadMedia,
+
+};
