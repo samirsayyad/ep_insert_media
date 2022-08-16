@@ -17,7 +17,6 @@ const aceInserMediaToPad = (action, mediaData) => {
   padeditor.ace.callWithAce((ace) => {
     const rep = ace.ace_getRep();
     ace.ace_replaceRange(rep.selStart, rep.selEnd, 'E');
-    console.log(rep.selStart, rep.selEnd);
     ace.ace_performSelectionChange([rep.selStart[0], rep.selStart[1] - 1], rep.selStart, false);
     ace.ace_performDocumentApplyAttributesToRange(
         rep.selStart, rep.selEnd,
@@ -173,9 +172,9 @@ export const documentReady = (hookName, context) => {
     const fd = new FormData();
     const files = $('#file')[0].files[0];
     fd.append('mediaFile', files);
-    console.log(mediaData, fd);
+    const padId = clientVars.padId;
     $.ajax({
-      url: `/p/${clientVars.padId}/pluginfw/ep_insert_media/upload`,
+      url: `/pluginfw/ep_insert_media/mdeia/${padId}`,
       type: 'post',
       data: fd,
       contentType: false,
@@ -188,24 +187,18 @@ export const documentReady = (hookName, context) => {
         alert(thrownError);
       },
       success: (response) => {
-        console.log(response);
-        const {type, fileType, error} = response;
-        if (response && error === false) {
-          return displayError(`ep_insert_media: ${error}`);
-        }
+        const {fileType, error} = response;
+        if (response?.error) return displayError(`ep_insert_media: ${error}`);
 
-        let mediaURI = `/pluginfw/ep_insert_media/media/${response.fileName}'`;
+        const mediaURI = `/pluginfw/ep_insert_media/media/${padId}/${response.fileName}`;
 
         if (fileType === 'image') {
-          if (type === 's3') mediaURI = `/p/getImage/${response.fileName}`;
           mediaData.url = encodeURI(mediaURI);
           aceInserMediaToPad('insertEmbedPicture', mediaData);
         } if (fileType === 'video') {
-          if (type === 's3') mediaURI = `/p/getVideo/${response.fileName}`;
           mediaData.url = encodeURI(mediaURI);
           aceInserMediaToPad('insertEmbedVideo', mediaData);
         } if (fileType === 'audio') {
-          if (type === 's3') mediaURI = `/p/getMedia/${response.fileName}`;
           mediaData.url = encodeURI(mediaURI);
           aceInserMediaToPad('insertEmbedAudio', mediaData);
         }
